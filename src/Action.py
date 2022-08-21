@@ -8,3 +8,6 @@ class Action(Enum):
     TURN_RIGHT = 4
     TURN_LEFT_INP = 5
     TURN_RIGHT_INP = 6
+
+class OverrideAction(Enum):
+    STOP = 1
