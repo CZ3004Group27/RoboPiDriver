@@ -1,0 +1,10 @@
+name: RoboPiDriver
+channels:
+  - conda-forge
+dependencies:
+  - python=3.9
+  - opencv
+  - pip
+  - django
+  - pip:
+    - "--editable=git+https://github.com/pybluez/pybluez.git#egg=pybluez"

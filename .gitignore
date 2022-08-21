@@ -1,0 +1,8 @@
+*.pyc
+/*
+!/.gitignore
+!/.gitattributes
+!/environment.yml
+!/README.md
+!/raspberry\ pi\ class\ diagram.drawio
+!/src
