@@ -6,12 +6,11 @@ from CameraModule import CameraModule
 from Action import *
 import cv2
 
-
-
 if __name__ == '__main__':
     # Initialise Variables
     stopped = False
     override_action = None
+    map_array = None
     camera = CameraModule()
     stm = STMModule()
     override_queue = Queue()
@@ -23,11 +22,11 @@ if __name__ == '__main__':
     image = None
 
     # Initialise Wifi thread
-    wifi_thread = WifiModule(wifi_stopped_queue,wifi_command_queue, move_list, override_queue)
+    wifi_thread = WifiModule(wifi_stopped_queue, wifi_command_queue, android_command_queue, override_queue)
     wifi_thread.start()
 
     # Initialise android bluetooth thread
-    android_thread = AndroidLinkModule(android_stopped_queue, android_command_queue, move_list, override_queue)
+    android_thread = AndroidLinkModule(android_stopped_queue, android_command_queue, override_queue)
     android_thread.start()
 
     # Main thread loop (try catch block is to intercept ctrl-c stop command so that it closes gracefully)
@@ -48,7 +47,7 @@ if __name__ == '__main__':
                     # Take a picture with picamera
                     image = CameraModule.take_picture()
                     # Send image by bluetooth/wifi ???
-                    wifi_command_queue.put(CommandAction(CommandType.SEND_PICTURE,image))
+                    wifi_command_queue.put(Action(WifiAction.SEND_PICTURE, image))
                 else:
                     STMModule.process_move(move)
     except KeyboardInterrupt:
