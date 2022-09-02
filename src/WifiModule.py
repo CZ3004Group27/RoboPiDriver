@@ -6,7 +6,7 @@ from Action import *
 
 class WifiModule(Process):
     HOST = ''  # Standard loopback interface address (localhost)
-    PORT = 65432  # Port to listen on (non-privileged ports are > 1023)
+    PORT = 25565  # Port to listen on (non-privileged ports are > 1023)
 
     def __init__(self, stopped_queue, main_command_queue, android_command_queue, main_thread_override_queue):
         Process.__init__(self)
