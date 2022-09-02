@@ -11,6 +11,7 @@ if os.name() == 'nt':
         def process_move(self, move: Action):
             pass
 else:
+    import serial
     class STMModule:
         def __init__(self):
             pass
