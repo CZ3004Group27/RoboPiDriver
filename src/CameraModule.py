@@ -24,16 +24,14 @@ else:
             self.camera = None
             self.rawCapture = None
             # initialize the camera and grab a reference to the raw camera capture
-            if os.name == 'nt':
-                self.camera = PiCamera()
-                self.rawCapture = PiRGBArray(camera)
-                # allow the camera to warmup
-                time.sleep(0.1)
-                self.initialised = True
-            else:
-                pass
+            self.camera = PiCamera()
+            self.rawCapture = PiRGBArray(camera)
+            # allow the camera to warmup
+            time.sleep(0.1)
+            self.initialised = True
 
         def take_picture(self):
             # grab an image from the camera
             self.camera.capture(self.rawCapture, format="bgr")
             image = self.rawCapture.array
+            return image

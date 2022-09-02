@@ -28,10 +28,11 @@ class AndroidBluetoothAction(Action):
     WIFI_CONNECTED = 4
     UPDATE_CURRENT_ACTION = 5
     UPDATE_CURRENT_LOCATION = 6
+    SEND_IMAGE_WITH_RESULT = 7
 
 
 class WifiAction(Action):
-    SEND_PICTURE = 1
+    SEND_IMAGE = 1
 
 
 class Command:
