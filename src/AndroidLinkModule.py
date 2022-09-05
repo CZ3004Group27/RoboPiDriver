@@ -73,7 +73,7 @@ else:
     class AndroidLinkModule(Process):
         TIMEOUT_PERIOD = 0.5
 
-        def __init__(self, stopped_queue, main_command_queue,robot_action_list, main_thread_override_queue):
+        def __init__(self, stopped_queue, main_command_queue,robot_action_queue, main_thread_override_queue):
             Process.__init__(self)
             self.stopped = False
             self.robot_ready_status = False
@@ -81,10 +81,26 @@ else:
             self.wifi_connected_status = False
             self.stopped_queue = stopped_queue
             self.main_command_queue = main_command_queue
-            self.robot_action_list = robot_action_list
+            self.robot_action_queue = robot_action_queue
             self.main_thread_override_queue = main_thread_override_queue
             self.timeout_start = None
             self.timeout = None
+            self.command_dict = {
+                "START": self.start_robot,
+                "STOP": self.stop_robot,
+                "MOVE": self.move_robot
+            }
+            self.robot_move_dict = {"F": RobotAction.FORWARD,
+                                     "B": RobotAction.BACKWARD,
+                                     "L": RobotAction.TURN_FORWARD_LEFT,
+                                     "R": RobotAction.TURN_FORWARD_RIGHT,
+                                     "BR": RobotAction.TURN_BACKWARD_RIGHT,
+                                     "BL": RobotAction.TURN_BACKWARD_LEFT
+                                     }
+            self.pathing_dict{
+                "EXPLORE" : self.start_explore,
+                "PATH" : self.start_path
+            }
 
         # Setup behaviour
         # 1. Listen for bluetooth connection
@@ -162,12 +178,40 @@ else:
 
         def parse_android_message(self, data):
             command = data.split("/")
-            if command[0] = "START":
-                if command[1] = "EXPLORE":
-                    robot_pos_tuple = map(str, command[2].replace('(', '').replace(')', '').split(','))
-                    update_robot_pos_list = [int(robot_pos_tuple[1]),int(robot_pos_tuple[2]),int(robot_pos_tuple[3])]
-                    self.robot_action_list.put(Action(RobotAction.SET_ROBOT_POSITION_DIRECTION,update_robot_pos_list))
+            self.parse_command_type(command)
 
-
+        # TODO
         def send_android_message(self, message):
             pass
+
+        # TODO
+        def start_robot(self,command):
+            pass
+        #TODO
+        def move_robot(self,command):
+            pass
+        def stop_robot(self,command):
+            self.main_thread_override_queue.put(Command(OverrideAction.STOP,""))
+        def parse_command_type(self,command):
+            self.command_dict[command[0]](command)
+
+        # TODO
+        def set_robot_position(self,command):
+            pass
+
+        # TODO
+        def start_explore(self,command):
+            robot_position_info = map(str, command[2].replace('(','').replace(')','').split(','))
+
+            # list goes as: [x value, y value, robot direction]
+            robot_position_list = [int(robot_position_info[1]),int(robot_position_info[2]),int(robot_position_info[3])]
+
+            #Set robot location in main thread
+            self.robot_action_queue.put(Command(RobotAction.SET_ROBOT_POSITION_DIRECTION,robot_position_list))
+
+            # Set obstacle location in main thread
+            self.robot_action_queue.put(Command(RobotAction.SET_OBSTACLE_POSITION,))
+        # TODO
+        def start_path(self,command):
+            pass
+

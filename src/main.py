@@ -49,7 +49,7 @@ if __name__ == '__main__':
                     # Take a picture with picamera
                     image = CameraModule.take_picture()
                     # Send image by bluetooth/wifi ???
-                    wifi_command_queue.put(Action(WifiAction.SEND_PICTURE, image))
+                    wifi_command_queue.put(Command(WifiAction.SEND_PICTURE, image))
                 else:
                     STMModule.process_move(move)
     except KeyboardInterrupt:
