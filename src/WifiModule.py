@@ -64,4 +64,5 @@ class WifiModule(Process):
         data = conn.recv(2048)
         if len(data) == 0:
             pass
-        print("received [%s]" % data)
+        else:
+            print("received [%s]" % data)

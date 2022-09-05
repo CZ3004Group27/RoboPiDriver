@@ -14,13 +14,14 @@ else:
     import serial
     class STMModule:
         def __init__(self):
-            global ser
-            try:
-                ser = serial.Serial('/dev/ttyUSB1', 115200, timeout=3)  # Check that arduino has same baudrate of 115200
-            except:
-                ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=3)  # Check that arduino has same baudrate of 115200
+            #global ser
+            #try:
+            #    ser = serial.Serial('/dev/ttyUSB1', 115200, timeout=3)  # Check that arduino has same baudrate of 115200
+            #except:
+            #    ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=3)  # Check that arduino has same baudrate of 115200
 
-            ser.flush()
+            #ser.flush()
+            pass
 
         def process_move(self, move: RobotAction):
             pass

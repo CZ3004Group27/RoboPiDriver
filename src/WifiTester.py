@@ -26,7 +26,7 @@ port_text_box.pack()
 def buttonCallBack():
     print("Sending Message...")
     HOST = ip_text_box.get("1.0",'end-1c')
-    PORT = port_text_box.get("1.0",'end-1c')
+    PORT = int(port_text_box.get("1.0",'end-1c'))
     print(HOST)
     print(PORT)
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
