@@ -54,10 +54,14 @@ class WifiModule(Process):
                             self.send_image(command.data)
                     # Get data from wifi connection
                     self.receive_image(conn)
+
                 print("stopping!")
 
     def send_image(self, image):
         pass
 
     def receive_image(self, conn):
-        pass
+        data = conn.recv(2048)
+        if len(data) == 0:
+            pass
+        print("received [%s]" % data)

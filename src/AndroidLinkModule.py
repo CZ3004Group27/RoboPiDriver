@@ -97,7 +97,7 @@ else:
                                      "BR": RobotAction.TURN_BACKWARD_RIGHT,
                                      "BL": RobotAction.TURN_BACKWARD_LEFT
                                      }
-            self.pathing_dict{
+            self.pathing_dict = {
                 "EXPLORE" : self.start_explore,
                 "PATH" : self.start_path
             }

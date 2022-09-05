@@ -2,7 +2,7 @@ from multiprocessing import Process, Queue
 from Action import *
 import os
 
-if os.name() == 'nt':
+if os.name == 'nt':
 
     class STMModule:
         def __init__(self):

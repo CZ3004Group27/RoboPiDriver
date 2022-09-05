@@ -15,8 +15,6 @@ if os.name == 'nt':
 
 # Posix (Linux, OS X)
 else:
-    import picamera
-
 
     class CameraModule:
         def __init__(self):
@@ -24,14 +22,15 @@ else:
             self.camera = None
             self.rawCapture = None
             # initialize the camera and grab a reference to the raw camera capture
-            self.camera = PiCamera()
-            self.rawCapture = PiRGBArray(camera)
+            self.camera = cv2.VideoCapture(0)
             # allow the camera to warmup
             time.sleep(0.1)
             self.initialised = True
 
         def take_picture(self):
             # grab an image from the camera
-            self.camera.capture(self.rawCapture, format="bgr")
-            image = self.rawCapture.array
-            return image
+            ret, frame = self.camera.read()
+            if ret:
+                return frame
+            else:
+                return None
