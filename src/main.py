@@ -18,15 +18,17 @@ if __name__ == '__main__':
     android_stopped_queue = Queue()
     wifi_command_queue = Queue()
     android_command_queue = Queue()
-    move_list = Queue()
+    action_list = Queue()
     image = None
+    robot_position_x = 0
+    robot_position_y = 0
 
     # Initialise Wifi thread
     wifi_thread = WifiModule(wifi_stopped_queue, wifi_command_queue, android_command_queue, override_queue)
     wifi_thread.start()
 
     # Initialise android bluetooth thread
-    android_thread = AndroidLinkModule(android_stopped_queue, android_command_queue, override_queue)
+    android_thread = AndroidLinkModule(android_stopped_queue, android_command_queue,action_list, override_queue)
     android_thread.start()
 
     # Main thread loop (try catch block is to intercept ctrl-c stop command so that it closes gracefully)
@@ -41,8 +43,8 @@ if __name__ == '__main__':
                     stopped = True
                     break
             # Check and run one move per loop
-            if not move_list.empty():
-                move = move_list.get()
+            if not action_list.empty():
+                move = action_list.get()
                 if move == Action.TAKE_PICTURE:
                     # Take a picture with picamera
                     image = CameraModule.take_picture()

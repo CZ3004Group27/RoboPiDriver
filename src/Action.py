@@ -12,9 +12,8 @@ class RobotAction(Action):
     TURN_FORWARD_RIGHT = 4
     TURN_BACKWARD_LEFT = 5
     TURN_BACKWARD_RIGHT = 6
-    TURN_LEFT_INP = 7
-    TURN_RIGHT_INP = 8
-    TAKE_PICTURE = 9
+    SET_ROBOT_POSITION_DIRECTION = 7
+    TAKE_PICTURE = 8
 
 
 class OverrideAction(Action):

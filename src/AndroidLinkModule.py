@@ -3,11 +3,13 @@ from multiprocessing import Process, Queue
 from Action import *
 import os
 
+# receives map from android tablet and sends image result to tablet and robot position
+
 if os.name == 'nt':
     class AndroidLinkModule(Process):
         TIMEOUT_PERIOD = 0.5
 
-        def __init__(self, stopped_queue, main_command_queue, main_thread_override_queue):
+        def __init__(self, stopped_queue, main_command_queue,robot_action_list, main_thread_override_queue):
             Process.__init__(self)
             self.stopped = False
             self.robot_ready_status = False
@@ -15,6 +17,7 @@ if os.name == 'nt':
             self.wifi_connected_status = False
             self.stopped_queue = stopped_queue
             self.main_command_queue = main_command_queue
+            self.robot_action_list = robot_action_list
             self.main_thread_override_queue = main_thread_override_queue
             self.timeout_start = None
             self.timeout = None
@@ -70,7 +73,7 @@ else:
     class AndroidLinkModule(Process):
         TIMEOUT_PERIOD = 0.5
 
-        def __init__(self, stopped_queue, main_command_queue, main_thread_override_queue):
+        def __init__(self, stopped_queue, main_command_queue,robot_action_list, main_thread_override_queue):
             Process.__init__(self)
             self.stopped = False
             self.robot_ready_status = False
@@ -78,6 +81,7 @@ else:
             self.wifi_connected_status = False
             self.stopped_queue = stopped_queue
             self.main_command_queue = main_command_queue
+            self.robot_action_list = robot_action_list
             self.main_thread_override_queue = main_thread_override_queue
             self.timeout_start = None
             self.timeout = None
@@ -91,7 +95,8 @@ else:
         # 3. run all possible commands from command thread (or timeout and send back info after 0.5? seconds)
         # 4. check for pending android commands
         # 5. send android commands to main thread
-        # 6. repeat loop
+        # 6. send android robot status
+        # 7. repeat loop
         def run(self):
             server_sock = BluetoothSocket(RFCOMM)
             server_sock.bind(("", PORT_ANY))
@@ -153,7 +158,16 @@ else:
                     print("received [%s]" % data)
 
             print("stopping!")
+
+
         def parse_android_message(self, data):
-            pass
+            command = data.split("/")
+            if command[0] = "START":
+                if command[1] = "EXPLORE":
+                    robot_pos_tuple = map(str, command[2].replace('(', '').replace(')', '').split(','))
+                    update_robot_pos_list = [int(robot_pos_tuple[1]),int(robot_pos_tuple[2]),int(robot_pos_tuple[3])]
+                    self.robot_action_list.put(Action(RobotAction.SET_ROBOT_POSITION_DIRECTION,update_robot_pos_list))
+
+
         def send_android_message(self, message):
             pass

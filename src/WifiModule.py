@@ -3,8 +3,15 @@ import os
 import socket
 from Action import *
 
-
+# receives movement instructions and image result from PC, sends to it map information
 class WifiModule(Process):
+    wifi_string_conv_dict = {"MOVE/F": RobotAction.FORWARD,
+                             "MOVE/B": RobotAction.BACKWARD,
+                             "MOVE/L" : RobotAction.TURN_FORWARD_LEFT,
+                             "MOVE/R" : RobotAction.TURN_FORWARD_RIGHT,
+                             "MOVE/BR" : RobotAction.TURN_BACKWARD_RIGHT,
+                             "Move/BL" : RobotAction.TURN_BACKWARD_LEFT
+                             }
     HOST = ''  # Standard loopback interface address (localhost)
     PORT = 25565  # Port to listen on (non-privileged ports are > 1023)
 
