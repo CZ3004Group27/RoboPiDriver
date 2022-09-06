@@ -135,46 +135,46 @@ else:
             print("Accepted connection from ", client_info)
 
             print("loop running")
-                while not self.stopped:
-                    # 1. check for stopped
-                    if not self.stopped_queue.empty():
-                        command = self.stopped_queue.get()
-                        if command.command_type == OverrideAction.STOP:
-                            self.stopped = True
-                            break
+            while not self.stopped:
+                # 1. check for stopped
+                if not self.stopped_queue.empty():
+                    command = self.stopped_queue.get()
+                    if command.command_type == OverrideAction.STOP:
+                        self.stopped = True
+                        break
 
-                    # 4. run all possible commands from command thread or until timeout
-                    self.timeout_start = time.time()
-                    if not self.main_command_queue.empty():
-                        self.timeout = time.time() - self.timeout_start
+                # 4. run all possible commands from command thread or until timeout
+                self.timeout_start = time.time()
+                if not self.main_command_queue.empty():
+                    self.timeout = time.time() - self.timeout_start
 
-                        # Get out of loop if time has surpassed TIMEOUT_PERIOD
-                        if self.timeout > self.TIMEOUT_PERIOD:
-                            break
+                    # Get out of loop if time has surpassed TIMEOUT_PERIOD
+                    if self.timeout > self.TIMEOUT_PERIOD:
+                        break
 
-                        command = self.main_command_queue.get()
+                    command = self.main_command_queue.get()
 
-                        # COMMAND SWITCH BLOCK
-                        if command.command_type == AndroidBluetoothAction.ROBOT_NOT_READY:
-                            self.robot_ready_status = False
-                        elif command.command_type == AndroidBluetoothAction.ROBOT_READY:
-                            self.robot_ready_status = True
-                        elif command.command_type == AndroidBluetoothAction.WIFI_DISCONNECTED:
-                            self.wifi_connected_status = False
-                        elif command.command_type == AndroidBluetoothAction.WIFI_CONNECTED:
-                            self.wifi_connected_status = True
-                    #
-                    data = client_sock.recv(2048)
-                    if len(data) == 0:
-                        continue
-                    else:
-                        # self.parse_android_message(data)
-                        # Send command to main thread
-                        print("received [%s]" % data)
+                    # COMMAND SWITCH BLOCK
+                    if command.command_type == AndroidBluetoothAction.ROBOT_NOT_READY:
+                        self.robot_ready_status = False
+                    elif command.command_type == AndroidBluetoothAction.ROBOT_READY:
+                        self.robot_ready_status = True
+                    elif command.command_type == AndroidBluetoothAction.WIFI_DISCONNECTED:
+                        self.wifi_connected_status = False
+                    elif command.command_type == AndroidBluetoothAction.WIFI_CONNECTED:
+                        self.wifi_connected_status = True
+                #
+                data = client_sock.recv(2048)
+                if len(data) == 0:
+                    continue
+                else:
+                    # self.parse_android_message(data)
+                    # Send command to main thread
+                    print("received [%s]" % data)
 
-            print("stopping!")
-            client_sock.close()
-            server_sock.close()
+        print("stopping!")
+        client_sock.close()
+        server_sock.close()
 
 
         def parse_android_message(self, data):
