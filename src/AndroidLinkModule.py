@@ -172,9 +172,9 @@ else:
                     # Send command to main thread
                     print("received [%s]" % data)
 
-        print("stopping!")
-        client_sock.close()
-        server_sock.close()
+            print("stopping!")
+            client_sock.close()
+            server_sock.close()
 
 
         def parse_android_message(self, data):
