@@ -169,9 +169,9 @@ else:
                     if len(data) == 0:
                         continue
                     else:
-                        self.parse_android_message(data)
+                        # self.parse_android_message(data)
                         # Send command to main thread
-                    print("received [%s]" % data)
+                        print("received [%s]" % data)
 
             print("stopping!")
 
