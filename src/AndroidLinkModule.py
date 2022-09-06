@@ -135,7 +135,6 @@ else:
             print("Accepted connection from ", client_info)
 
             print("loop running")
-            with client_sock:
                 while not self.stopped:
                     # 1. check for stopped
                     if not self.stopped_queue.empty():
@@ -174,6 +173,8 @@ else:
                         print("received [%s]" % data)
 
             print("stopping!")
+            client_sock.close()
+            server_sock.close()
 
 
         def parse_android_message(self, data):

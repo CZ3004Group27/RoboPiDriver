@@ -1,5 +1,5 @@
 from tkinter import *
-from bluetooth import *
+import bluetooth
 from functools import partial
 import socket
 
@@ -32,9 +32,9 @@ def buttonCallBack():
     print(HOST)
     print(PORT)
     sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
-    with bluetooth.BluetoothSocket(bluetooth.RFCOMM) as s:
-        s.connect((HOST, PORT))
-        s.sendall(b"Hello, world")
+    sock.connect((HOST, PORT))
+    sock.send(b"Hello, world")
+    sock.close()
 
 
 B = Button(window, text="send test", command=buttonCallBack)
