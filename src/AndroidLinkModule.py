@@ -9,7 +9,7 @@ if os.name == 'nt':
     class AndroidLinkModule(Process):
         TIMEOUT_PERIOD = 0.5
 
-        def __init__(self, stopped_queue, main_command_queue,robot_action_list, main_thread_override_queue):
+        def __init__(self, stopped_queue, main_command_queue, robot_action_queue, main_thread_override_queue):
             Process.__init__(self)
             self.stopped = False
             self.robot_ready_status = False
@@ -17,7 +17,7 @@ if os.name == 'nt':
             self.wifi_connected_status = False
             self.stopped_queue = stopped_queue
             self.main_command_queue = main_command_queue
-            self.robot_action_list = robot_action_list
+            self.robot_action_queue = robot_action_queue
             self.main_thread_override_queue = main_thread_override_queue
             self.timeout_start = None
             self.timeout = None
@@ -73,7 +73,7 @@ else:
     class AndroidLinkModule(Process):
         TIMEOUT_PERIOD = 0.5
 
-        def __init__(self, stopped_queue, main_command_queue,robot_action_queue, main_thread_override_queue):
+        def __init__(self, stopped_queue, main_command_queue, robot_action_queue, main_thread_override_queue):
             Process.__init__(self)
             self.stopped = False
             self.robot_ready_status = False
@@ -91,15 +91,15 @@ else:
                 "MOVE": self.move_robot
             }
             self.robot_move_dict = {"F": RobotAction.FORWARD,
-                                     "B": RobotAction.BACKWARD,
-                                     "L": RobotAction.TURN_FORWARD_LEFT,
-                                     "R": RobotAction.TURN_FORWARD_RIGHT,
-                                     "BR": RobotAction.TURN_BACKWARD_RIGHT,
-                                     "BL": RobotAction.TURN_BACKWARD_LEFT
-                                     }
+                                    "B": RobotAction.BACKWARD,
+                                    "L": RobotAction.TURN_FORWARD_LEFT,
+                                    "R": RobotAction.TURN_FORWARD_RIGHT,
+                                    "BR": RobotAction.TURN_BACKWARD_RIGHT,
+                                    "BL": RobotAction.TURN_BACKWARD_LEFT
+                                    }
             self.pathing_dict = {
-                "EXPLORE" : self.start_explore,
-                "PATH" : self.start_path
+                "EXPLORE": self.start_explore,
+                "PATH": self.start_path
             }
 
         # Setup behaviour
@@ -133,6 +133,7 @@ else:
 
             client_sock, client_info = server_sock.accept()
             print("Accepted connection from ", client_info)
+            self.bluetooth_connected_status = True
 
             print("loop running")
             while not self.stopped:
@@ -175,7 +176,7 @@ else:
             print("stopping!")
             client_sock.close()
             server_sock.close()
-
+            self.bluetooth_connected_status = False
 
         def parse_android_message(self, data):
             command = data.split("/")
@@ -185,34 +186,37 @@ else:
         def send_android_message(self, message):
             pass
 
-        # TODO
-        def start_robot(self,command):
-            pass
-        #TODO
-        def move_robot(self,command):
-            pass
-        def stop_robot(self,command):
-            self.main_thread_override_queue.put(Command(OverrideAction.STOP,""))
-        def parse_command_type(self,command):
+        def start_robot(self, command):
+            # Run command based on explore or fastest path
+            self.pathing_dict[command[1]](command)
+
+        def move_robot(self, command):
+            movement_value = self.robot_move_dict[command[1]]
+            self.main_command_queue.put(Command(movement_value, ""))
+
+        def stop_robot(self, command):
+            self.main_thread_override_queue.put(Command(OverrideAction.STOP, ""))
+
+        def parse_command_type(self, command):
+            # Run command based on start/stop/move
             self.command_dict[command[0]](command)
 
-        # TODO
-        def set_robot_position(self,command):
-            pass
-
-        # TODO
-        def start_explore(self,command):
-            robot_position_info = map(str, command[2].replace('(','').replace(')','').split(','))
+        def set_robot_position(self, command):
+            robot_position_info = map(str, command[2].replace('(', '').replace(')', '').split(','))
 
             # list goes as: [x value, y value, robot direction]
-            robot_position_list = [int(robot_position_info[1]),int(robot_position_info[2]),int(robot_position_info[3])]
+            robot_position_list = [int(robot_position_info[1]), int(robot_position_info[2]),
+                                   int(robot_position_info[3])]
 
-            #Set robot location in main thread
-            self.robot_action_queue.put(Command(RobotAction.SET_ROBOT_POSITION_DIRECTION,robot_position_list))
+            # Set robot location in main thread
+            self.robot_action_queue.put(Command(RobotAction.SET_ROBOT_POSITION_DIRECTION, robot_position_list))
 
-            # Set obstacle location in main thread
-            self.robot_action_queue.put(Command(RobotAction.SET_OBSTACLE_POSITION,))
-        # TODO
-        def start_path(self,command):
-            pass
+        def start_explore(self, command):
+            self.set_robot_position(command)
+            self.start_mission(command)
 
+        def start_path(self, command):
+            self.start_mission(command)
+
+        def start_mission(self, command):
+            self.robot_action_queue.put(Command(RobotAction.START_MISSION, command))

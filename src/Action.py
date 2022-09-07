@@ -15,8 +15,7 @@ class RobotAction(Action):
     SET_ROBOT_POSITION_DIRECTION = 7
     SET_OBSTACLE_POSITION = 8
     TAKE_PICTURE = 9
-    START_PATH = 10
-    START_EXPLORE = 11
+    START_MISSION = 10
 
 
 class OverrideAction(Action):
@@ -35,6 +34,8 @@ class AndroidBluetoothAction(Action):
 
 class WifiAction(Action):
     SEND_IMAGE = 1
+    UPDATE_CURRENT_LOCATION = 2
+    START_MISSION = 3
 
 
 class Command:

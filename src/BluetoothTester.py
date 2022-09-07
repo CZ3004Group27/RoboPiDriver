@@ -34,7 +34,6 @@ def buttonCallBack():
     sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
     sock.connect((HOST, PORT))
     sock.send(b"Hello, world")
-    sock.close()
 
 
 B = Button(window, text="send test", command=buttonCallBack)
