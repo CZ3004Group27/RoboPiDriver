@@ -5,6 +5,7 @@ from AndroidLinkModule import AndroidLinkModule
 from CameraModule import CameraModule
 from Action import *
 import cv2
+import socket
 
 if __name__ == '__main__':
     # Initialise Variables
@@ -27,10 +28,12 @@ if __name__ == '__main__':
     robot_direction = 0
 
     # Initialise Wifi thread
+    print("starting wifi module")
     wifi_thread = WifiModule(wifi_stopped_queue, wifi_command_queue, android_command_queue, override_queue)
     wifi_thread.start()
 
     # Initialise android bluetooth thread
+    print("starting bluetooth module")
     android_thread = AndroidLinkModule(android_stopped_queue, android_command_queue, action_list, override_queue)
     android_thread.start()
 
@@ -50,7 +53,8 @@ if __name__ == '__main__':
                 command = action_list.get()
                 # if action is a movement action
                 if int(command.command_type) <= int(RobotAction.TURN_BACKWARD_RIGHT):
-                    x, y, r = STMModule.process_move(command.command_type, robot_position_x, robot_position_y, robot_direction)
+                    x, y, r = STMModule.process_move(command.command_type, robot_position_x, robot_position_y,
+                                                     robot_direction)
                     robot_position_x = x
                     robot_position_y = y
                     robot_direction = r
@@ -81,9 +85,12 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         wifi_stopped_queue.put(True)
         android_stopped_queue.put(True)
+        close_socket = socket.socket(socket.AF_INET,
+                                     socket.SOCK_STREAM).connect(("127.0.0.1", WifiModule.PORT))
+        close_socket.close()
 
-    wifi_thread.join()
-    print("wifi thread stopped")
     android_thread.join()
     print("android thread stopped")
+    wifi_thread.join()
+    print("wifi thread stopped")
     print("program shutting down")
