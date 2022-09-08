@@ -34,8 +34,7 @@ class AndroidBluetoothAction(Action):
 
 class WifiAction(Action):
     SEND_IMAGE = 1
-    UPDATE_CURRENT_LOCATION = 2
-    START_MISSION = 3
+    START_MISSION = 2
 
 
 class Command:

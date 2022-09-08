@@ -164,6 +164,8 @@ else:
                         self.wifi_connected_status = False
                     elif command.command_type == AndroidBluetoothAction.WIFI_CONNECTED:
                         self.wifi_connected_status = True
+                    string_to_send = "STATUS/" + str(self.robot_ready_status) + "/" + str(self.wifi_connected_status)
+                    client_sock.send(str.encode(string_to_send))
                 #
                 data = client_sock.recv(2048)
                 if len(data) == 0:
@@ -180,7 +182,7 @@ else:
 
         def parse_android_message(self, data):
             command = data.split("/")
-            self.parse_command_type(command)
+            self.parse_command_type(command, data)
 
         # TODO
         def send_android_message(self, message):
@@ -197,11 +199,11 @@ else:
         def stop_robot(self, command):
             self.main_thread_override_queue.put(Command(OverrideAction.STOP, ""))
 
-        def parse_command_type(self, command):
+        def parse_command_type(self, command, data):
             # Run command based on start/stop/move
-            self.command_dict[command[0]](command)
+            self.command_dict[command[0]](command, data)
 
-        def set_robot_position(self, command):
+        def set_robot_position(self, command, data):
             robot_position_info = map(str, command[2].replace('(', '').replace(')', '').split(','))
 
             # list goes as: [x value, y value, robot direction]
@@ -211,12 +213,12 @@ else:
             # Set robot location in main thread
             self.robot_action_queue.put(Command(RobotAction.SET_ROBOT_POSITION_DIRECTION, robot_position_list))
 
-        def start_explore(self, command):
+        def start_explore(self, command, data):
             self.set_robot_position(command)
-            self.start_mission(command)
+            self.start_mission(command, data)
 
-        def start_path(self, command):
-            self.start_mission(command)
+        def start_path(self, command, data):
+            self.start_mission(command, data)
 
-        def start_mission(self, command):
-            self.robot_action_queue.put(Command(RobotAction.START_MISSION, command))
+        def start_mission(self, command, data):
+            self.robot_action_queue.put(Command(RobotAction.START_MISSION, data))

@@ -4,6 +4,10 @@ import socket
 from Action import *
 
 # receives movement instructions and image result from PC, sends to it map information
+def send_start_mission_command(conn, data):
+    conn.sendall(str.encode(data))
+
+
 class WifiModule(Process):
     wifi_string_conv_dict = {"MOVE/F": RobotAction.FORWARD,
                              "MOVE/B": RobotAction.BACKWARD,
@@ -50,10 +54,17 @@ class WifiModule(Process):
                             break
                     if not self.main_command_queue.empty():
                         command = self.main_command_queue.get()
-                        if command.command_type == WifiAction.SEND_IMAGE:
+                        if command.command_type == WifiAction.START_MISSION:
+                            send_start_mission_command(conn, command.data)
+                        elif command.command_type == WifiAction.SEND_IMAGE:
                             self.send_image(command.data)
                     # Get data from wifi connection
-                    self.receive_image(conn)
+                    data = conn.recv(2048)
+                    if len(data) == 0:
+                        pass
+                    else:
+                        print("received [%s]" % data)
+
 
                 print("stopping!")
 
@@ -66,3 +77,6 @@ class WifiModule(Process):
             pass
         else:
             print("received [%s]" % data)
+
+    def parse_wifi_command(self, data):
+        pass
