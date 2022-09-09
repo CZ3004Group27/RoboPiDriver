@@ -1,6 +1,7 @@
 from CameraModule import CameraModule
 import socket
 import cv2
+import base64
 
 
 class Server:
@@ -26,7 +27,8 @@ class Server:
                     if command[0] == "PHOTO":
                         print("phototaking command received!")
                         image = self.camera.take_picture()
-                        string_to_send = "PHOTODATA/" + image.tostring()
+
+                        string_to_send = "PHOTODATA/" + base64.b64encode(image.tobytes()).decode("utf-8")
                         print("sending photo image")
                         print(string_to_send)
                         conn.sendall(string_to_send.encode("utf-8"))
