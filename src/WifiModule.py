@@ -2,21 +2,20 @@ from multiprocessing import Process, Queue
 import os
 import socket
 from Action import *
+from CameraModule import CameraModule
+
 
 
 # receives movement instructions and image result from PC, sends to it map information
-def send_start_mission_command(conn, data):
-    conn.sendall(str.encode(data))
+
+
+def send_image(image, conn):
+    # Send image
+    string_to_send = "PHOTODATA/" + image.tostring()
+    conn.sendall(string_to_send.encode("utf-8"))
 
 
 class WifiModule(Process):
-    wifi_string_conv_dict = {"MOVE/F": RobotAction.FORWARD,
-                             "MOVE/B": RobotAction.BACKWARD,
-                             "MOVE/L": RobotAction.TURN_FORWARD_LEFT,
-                             "MOVE/R": RobotAction.TURN_FORWARD_RIGHT,
-                             "MOVE/BR": RobotAction.TURN_BACKWARD_RIGHT,
-                             "Move/BL": RobotAction.TURN_BACKWARD_LEFT
-                             }
     HOST = ''  # Standard loopback interface address (localhost)
     PORT = 25565  # Port to listen on (non-privileged ports are > 1023)
 
@@ -27,6 +26,17 @@ class WifiModule(Process):
         self.main_command_queue = main_command_queue
         self.android_command_queue = android_command_queue
         self.main_thread_override_queue = main_thread_override_queue
+        self.camera = CameraModule()
+        self.wifi_string_conv_dict = {"F": RobotAction.FORWARD,
+                                      "B": RobotAction.BACKWARD,
+                                      "L": RobotAction.TURN_FORWARD_LEFT,
+                                      "R": RobotAction.TURN_FORWARD_RIGHT,
+                                      "BR": RobotAction.TURN_BACKWARD_RIGHT,
+                                      "BL": RobotAction.TURN_BACKWARD_LEFT
+                                      }
+        self.wifi_command_dict = {"PHOTO": self.take_photo,
+                                  "MOVEMENT": self.get_movement
+                                  }
         print("hello")
 
     # Setup behaviour
@@ -56,39 +66,29 @@ class WifiModule(Process):
                     if not self.main_command_queue.empty():
                         command = self.main_command_queue.get()
                         if command.command_type == WifiAction.START_MISSION:
-                            send_start_mission_command(conn, command.data)
-                            self.receive_mission_directions(conn)
-                        elif command.command_type == WifiAction.SEND_IMAGE:
-                            self.send_image(command.data)
+                            self.send_start_mission_command(conn, command.data)
                     # Get data from wifi connection
                     data = conn.recv(2048)
                     if len(data) == 0:
                         pass
                     else:
+                        self.parse_wifi_command(data, conn)
                         print("received [%s]" % data)
 
                 print("stopping!")
 
-    def send_image(self, image):
+    def send_start_mission_command(self, conn, data):
+        conn.sendall(str.encode(data))
+
+    def receive_photo_result_data(self, conn):
         pass
 
-    def receive_image(self, conn):
-        data = conn.recv(2048)
-        if len(data) == 0:
-            pass
-        else:
-            print("received [%s]" % data)
+    def take_photo(self, command, conn):
+        photo = self.camera.take_picture()
+        # SEND PICTURE
+        send_image(photo, conn)
 
-    def receive_mission_directions(self, conn):
-        looping = True
-        while looping:
-            data = conn.recv(2048)
-            if len(data) == 0:
-                looping = self.parse_wifi_command(data)
-            else:
-                print("received [%s]" % data)
-
-    def parse_wifi_command(self, data):
+    def todo_receive_mission_instructions(self, data):
         output = True
         encoding = 'utf-8'
         parsed_string = data.decode(encoding)
@@ -98,3 +98,13 @@ class WifiModule(Process):
             # Parse movement into list of moves
             move_list = list()
             self.main_command_queue.put(Command(RobotAction.RECEIVE_MISSION_INSTRUCTIONS, (move_list, data)))
+
+    def get_movement(self, command, conn):
+        obstacle = command[1].split("-")
+        self.main_command_queue.put(Command(RobotAction.SET_OBSTACLE_POSITION, obstacle))
+        # TODO:Get list of movements and send to main thread
+
+    def parse_wifi_command(self, data, conn):
+        raw_string = data.decode("utf-8")
+        command = raw_string.split("/")
+        self.wifi_command_dict[command[0]](command, conn)

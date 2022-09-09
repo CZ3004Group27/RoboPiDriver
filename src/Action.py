@@ -14,9 +14,8 @@ class RobotAction(Action):
     TURN_BACKWARD_RIGHT = 6
     SET_ROBOT_POSITION_DIRECTION = 7
     SET_OBSTACLE_POSITION = 8
-    TAKE_PICTURE = 9
-    START_MISSION = 10
-    RECEIVE_MISSION_INSTRUCTIONS = 11 # (list of moves, original string command)
+    START_MISSION = 9
+    RECEIVE_MISSION_INSTRUCTIONS = 10 # (list of moves, original string command)
 
 
 class OverrideAction(Action):
@@ -34,8 +33,7 @@ class AndroidBluetoothAction(Action):
 
 
 class WifiAction(Action):
-    SEND_IMAGE = 1
-    START_MISSION = 2
+    START_MISSION = 1
 
 
 class Command:
