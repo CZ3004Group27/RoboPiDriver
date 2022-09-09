@@ -181,7 +181,9 @@ else:
             self.bluetooth_connected_status = False
 
         def parse_android_message(self, data):
-            command = data.split("/")
+            encoding = 'utf-8'
+            parsed_string = data..decode(encoding)
+            command = parsed_string.split("/")
             self.parse_command_type(command, data)
 
         # TODO

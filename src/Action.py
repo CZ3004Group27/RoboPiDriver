@@ -16,6 +16,7 @@ class RobotAction(Action):
     SET_OBSTACLE_POSITION = 8
     TAKE_PICTURE = 9
     START_MISSION = 10
+    RECEIVE_MISSION_INSTRUCTIONS = 11 # (list of moves, original string command)
 
 
 class OverrideAction(Action):

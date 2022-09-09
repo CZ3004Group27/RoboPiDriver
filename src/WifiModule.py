@@ -3,6 +3,7 @@ import os
 import socket
 from Action import *
 
+
 # receives movement instructions and image result from PC, sends to it map information
 def send_start_mission_command(conn, data):
     conn.sendall(str.encode(data))
@@ -11,10 +12,10 @@ def send_start_mission_command(conn, data):
 class WifiModule(Process):
     wifi_string_conv_dict = {"MOVE/F": RobotAction.FORWARD,
                              "MOVE/B": RobotAction.BACKWARD,
-                             "MOVE/L" : RobotAction.TURN_FORWARD_LEFT,
-                             "MOVE/R" : RobotAction.TURN_FORWARD_RIGHT,
-                             "MOVE/BR" : RobotAction.TURN_BACKWARD_RIGHT,
-                             "Move/BL" : RobotAction.TURN_BACKWARD_LEFT
+                             "MOVE/L": RobotAction.TURN_FORWARD_LEFT,
+                             "MOVE/R": RobotAction.TURN_FORWARD_RIGHT,
+                             "MOVE/BR": RobotAction.TURN_BACKWARD_RIGHT,
+                             "Move/BL": RobotAction.TURN_BACKWARD_LEFT
                              }
     HOST = ''  # Standard loopback interface address (localhost)
     PORT = 25565  # Port to listen on (non-privileged ports are > 1023)
@@ -56,6 +57,7 @@ class WifiModule(Process):
                         command = self.main_command_queue.get()
                         if command.command_type == WifiAction.START_MISSION:
                             send_start_mission_command(conn, command.data)
+                            self.receive_mission_directions(conn)
                         elif command.command_type == WifiAction.SEND_IMAGE:
                             self.send_image(command.data)
                     # Get data from wifi connection
@@ -64,7 +66,6 @@ class WifiModule(Process):
                         pass
                     else:
                         print("received [%s]" % data)
-
 
                 print("stopping!")
 
@@ -78,5 +79,22 @@ class WifiModule(Process):
         else:
             print("received [%s]" % data)
 
+    def receive_mission_directions(self, conn):
+        looping = True
+        while looping:
+            data = conn.recv(2048)
+            if len(data) == 0:
+                looping = self.parse_wifi_command(data)
+            else:
+                print("received [%s]" % data)
+
     def parse_wifi_command(self, data):
-        pass
+        output = True
+        encoding = 'utf-8'
+        parsed_string = data.decode(encoding)
+        command = parsed_string.split("/")
+        if command[0] == "ROBOT":
+            output = False
+            # Parse movement into list of moves
+            move_list = list()
+            self.main_command_queue.put(Command(RobotAction.RECEIVE_MISSION_INSTRUCTIONS, (move_list, data)))
