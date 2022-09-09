@@ -2,20 +2,12 @@ from multiprocessing import Process, Queue
 import os
 import socket
 from Action import *
+from CameraModule import CameraModule
 
 # receives movement instructions and image result from PC, sends to it map information
-def send_start_mission_command(conn, data):
-    conn.sendall(str.encode(data))
 
 
 class WifiModule(Process):
-    wifi_string_conv_dict = {"MOVE/F": RobotAction.FORWARD,
-                             "MOVE/B": RobotAction.BACKWARD,
-                             "MOVE/L" : RobotAction.TURN_FORWARD_LEFT,
-                             "MOVE/R" : RobotAction.TURN_FORWARD_RIGHT,
-                             "MOVE/BR" : RobotAction.TURN_BACKWARD_RIGHT,
-                             "Move/BL" : RobotAction.TURN_BACKWARD_LEFT
-                             }
     HOST = ''  # Standard loopback interface address (localhost)
     PORT = 25565  # Port to listen on (non-privileged ports are > 1023)
 
@@ -26,6 +18,17 @@ class WifiModule(Process):
         self.main_command_queue = main_command_queue
         self.android_command_queue = android_command_queue
         self.main_thread_override_queue = main_thread_override_queue
+        self.camera = CameraModule()
+        self.wifi_string_conv_dict = {"F": RobotAction.FORWARD,
+                                      "B": RobotAction.BACKWARD,
+                                      "L": RobotAction.TURN_FORWARD_LEFT,
+                                      "R": RobotAction.TURN_FORWARD_RIGHT,
+                                      "BR": RobotAction.TURN_BACKWARD_RIGHT,
+                                      "BL": RobotAction.TURN_BACKWARD_LEFT
+                                      }
+        self.wifi_command_dict = {"PHOTO": self.send_image,
+                                  "MOVEMENT": self.get_movement
+                                  }
         print("hello")
 
     # Setup behaviour
@@ -55,28 +58,55 @@ class WifiModule(Process):
                     if not self.main_command_queue.empty():
                         command = self.main_command_queue.get()
                         if command.command_type == WifiAction.START_MISSION:
-                            send_start_mission_command(conn, command.data)
-                        elif command.command_type == WifiAction.SEND_IMAGE:
-                            self.send_image(command.data)
+                            self.send_start_mission_command(conn, command.data)
                     # Get data from wifi connection
                     data = conn.recv(2048)
                     if len(data) == 0:
                         pass
                     else:
+                        self.parse_wifi_command(data)
                         print("received [%s]" % data)
 
 
                 print("stopping!")
 
-    def send_image(self, image):
-        pass
+    def send_start_mission_command(self,conn, data):
+        conn.sendall(str.encode(data))
+        self.get_instructions(conn)
 
-    def receive_image(self, conn):
+    def get_instructions(self,conn):
+        # Get data from wifi connection
         data = conn.recv(2048)
         if len(data) == 0:
-            pass
+            raw_string = data.decode("utf-8")
+            command = raw_string.split("/")
+            self.wifi_command_dict[command[0]](command)
         else:
             print("received [%s]" % data)
+    def send_image(self, conn, image):
+        # Send image
+
+        # Receive image result
+        data = conn.recv(2048)
+        if len(data) == 0:
+            raw_string = data.decode("utf-8")
+            command = raw_string.split("/")
+            self.wifi_command_dict[command[0]](command)
+        else:
+            print("received [%s]" % data)
+    def receive_photo_result_data(self,conn):
+        pass
+
+    def take_photo(self, command):
+        photo = self.camera.take_picture()
+        # SEND PICTURE
+
+        # GET PICTURE RESULT
+
+    def get_movement(self, command):
+        obstacle = command[1].split("-")
+        self.main_command_queue.put(Command(RobotAction.SET_OBSTACLE_POSITION,obstacle))
+        # TODO:Get list of movements and send to main thread
 
     def parse_wifi_command(self, data):
         pass

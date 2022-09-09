@@ -2,9 +2,7 @@ from multiprocessing import Process, Lock, Queue
 from WifiModule import WifiModule
 from STMModule import STMModule
 from AndroidLinkModule import AndroidLinkModule
-from CameraModule import CameraModule
 from Action import *
-import cv2
 import socket
 
 if __name__ == '__main__':
@@ -12,7 +10,6 @@ if __name__ == '__main__':
     stopped = False
     override_action = None
     map_array = None
-    camera = CameraModule()
     stm = STMModule()
     override_queue = Queue()
     wifi_stopped_queue = Queue()
@@ -26,6 +23,8 @@ if __name__ == '__main__':
     robot_position_x = 0
     robot_position_y = 0
     robot_direction = 0
+    obstacle_position_x = -1
+    obstacle_position_y = -1
 
     # Initialise Wifi thread
     print("starting wifi module")
@@ -70,14 +69,8 @@ if __name__ == '__main__':
                     robot_position_y = temp_tuple[1]
                     robot_direction = temp_tuple[2]
                 elif command.command_type == RobotAction.SET_OBSTACLE_POSITION:
-                    # TODO:
-                    pass
-                # if action is a picture action
-                elif command.command_type == RobotAction.TAKE_PICTURE:
-                    # Take a picture with picamera
-                    image = CameraModule.take_picture()
-                    # Send image by bluetooth/wifi ???
-                    wifi_command_queue.put(Command(WifiAction.SEND_IMAGE, image))
+                    obstacle_position_x = command.data[0]
+                    obstacle_position_y = command.data[1]
                 elif command.command_type == RobotAction.START_MISSION:
                     wifi_command_queue.put(Command(WifiAction.START_MISSION, command.data))
                 else:
