@@ -4,7 +4,14 @@ import socket
 from Action import *
 from CameraModule import CameraModule
 
+
 # receives movement instructions and image result from PC, sends to it map information
+
+
+def send_image(image, conn):
+    # Send image
+    string_to_send = "PHOTODATA/" + image.tostring()
+    conn.sendall(string_to_send.encode("utf-8"))
 
 
 class WifiModule(Process):
@@ -26,7 +33,7 @@ class WifiModule(Process):
                                       "BR": RobotAction.TURN_BACKWARD_RIGHT,
                                       "BL": RobotAction.TURN_BACKWARD_LEFT
                                       }
-        self.wifi_command_dict = {"PHOTO": self.send_image,
+        self.wifi_command_dict = {"PHOTO": self.take_photo,
                                   "MOVEMENT": self.get_movement
                                   }
         print("hello")
@@ -64,49 +71,28 @@ class WifiModule(Process):
                     if len(data) == 0:
                         pass
                     else:
-                        self.parse_wifi_command(data)
+                        self.parse_wifi_command(data, conn)
                         print("received [%s]" % data)
-
 
                 print("stopping!")
 
-    def send_start_mission_command(self,conn, data):
+    def send_start_mission_command(self, conn, data):
         conn.sendall(str.encode(data))
-        self.get_instructions(conn)
 
-    def get_instructions(self,conn):
-        # Get data from wifi connection
-        data = conn.recv(2048)
-        if len(data) == 0:
-            raw_string = data.decode("utf-8")
-            command = raw_string.split("/")
-            self.wifi_command_dict[command[0]](command)
-        else:
-            print("received [%s]" % data)
-    def send_image(self, conn, image):
-        # Send image
-
-        # Receive image result
-        data = conn.recv(2048)
-        if len(data) == 0:
-            raw_string = data.decode("utf-8")
-            command = raw_string.split("/")
-            self.wifi_command_dict[command[0]](command)
-        else:
-            print("received [%s]" % data)
-    def receive_photo_result_data(self,conn):
+    def receive_photo_result_data(self, conn):
         pass
 
-    def take_photo(self, command):
+    def take_photo(self, command, conn):
         photo = self.camera.take_picture()
         # SEND PICTURE
+        send_image(photo, conn)
 
-        # GET PICTURE RESULT
-
-    def get_movement(self, command):
+    def get_movement(self, command, conn):
         obstacle = command[1].split("-")
-        self.main_command_queue.put(Command(RobotAction.SET_OBSTACLE_POSITION,obstacle))
+        self.main_command_queue.put(Command(RobotAction.SET_OBSTACLE_POSITION, obstacle))
         # TODO:Get list of movements and send to main thread
 
-    def parse_wifi_command(self, data):
-        pass
+    def parse_wifi_command(self, data, conn):
+        raw_string = data.decode("utf-8")
+        command = raw_string.split("/")
+        self.wifi_command_dict[command[0]](command, conn)
