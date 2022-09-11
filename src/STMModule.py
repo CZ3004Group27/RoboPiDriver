@@ -33,21 +33,65 @@ else:
             new_direction = robot_direction
             if move == RobotAction.FORWARD:
                 moved = True
-                pass
+                print("moving forward!")
+                new_y = new_y + (1 - robot_direction) * (int(not (robot_direction % 2)))
+                new_x = new_x + (2 - robot_direction) * (int((robot_direction % 2)))
             elif move == RobotAction.BACKWARD:
                 moved = True
-                pass
+                print("moving backward!")
+                new_y = new_y - (1 - robot_direction) * (int(not (robot_direction % 2)))
+                new_x = new_x - (2 - robot_direction) * (int((robot_direction % 2)))
             elif move == RobotAction.TURN_FORWARD_LEFT:
                 moved = True
-                pass
+                print("moving forward left!!")
+                if robot_direction == 0 or robot_direction == 1:
+                    new_y = new_y + 3
+                else:
+                    new_y = new_y - 3
+
+                if robot_direction == 1 or robot_direction == 2:
+                    new_x = new_x + 3
+                else:
+                    new_x = new_x - 3
+                new_direction = (new_direction - 1) % 4
             elif move == RobotAction.TURN_FORWARD_RIGHT:
                 moved = True
-                pass
+                print("moving forward right!")
+                if robot_direction == 0 or robot_direction == 3:
+                    new_y = new_y + 3
+                else:
+                    new_y = new_y - 3
+
+                if robot_direction == 0 or robot_direction == 1:
+                    new_x = new_x + 3
+                else:
+                    new_x = new_x - 3
+                new_direction = (new_direction + 1) % 4
             elif move == RobotAction.TURN_BACKWARD_LEFT:
                 moved = True
-                pass
+                print("moving backward left!")
+                if robot_direction == 1 or robot_direction == 2:
+                    new_y = new_y + 3
+                else:
+                    new_y = new_y - 3
+
+                if robot_direction == 2 or robot_direction == 3:
+                    new_x = new_x + 3
+                else:
+                    new_x = new_x - 3
+                new_direction = (new_direction + 1) % 4
             elif move == RobotAction.TURN_FORWARD_RIGHT:
                 moved = True
-                pass
+                print("moving backward right!")
+                if robot_direction == 1 or robot_direction == 2:
+                    new_y = new_y + 3
+                else:
+                    new_y = new_y - 3
+
+                if robot_direction == 0 or robot_direction == 3:
+                    new_x = new_x + 3
+                else:
+                    new_x = new_x - 3
+                new_direction = (new_direction - 1) % 4
             if moved:
                 return new_x, new_y, new_direction

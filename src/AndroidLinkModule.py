@@ -2,6 +2,8 @@ import time
 from multiprocessing import Process, Queue
 from Action import *
 import os
+import signal
+import socket
 
 # receives map from android tablet and sends image result to tablet and robot position
 
@@ -21,6 +23,7 @@ if os.name == 'nt':
             self.main_thread_override_queue = main_thread_override_queue
             self.timeout_start = None
             self.timeout = None
+
             print("hello")
 
         # Setup behaviour
@@ -33,6 +36,9 @@ if os.name == 'nt':
         # 4. run all possible commands from command thread (or timeout and send back info after 0.5? seconds)
         # 5. repeat loop
         def run(self):
+            """Ignore CTRL+C in the worker process."""
+            signal.signal(signal.SIGINT, signal.SIG_IGN)
+
             print("thread running")
             while not self.stopped:
                 # 1. check for stopped
@@ -69,6 +75,9 @@ if os.name == 'nt':
 else:
     from bluetooth import *
 
+
+    def android_close_module():
+        pass
 
     class AndroidLinkModule(Process):
         TIMEOUT_PERIOD = 0.5
@@ -132,6 +141,7 @@ else:
             print("Waiting for connection on RFCOMM channel %d" % port)
 
             client_sock, client_info = server_sock.accept()
+            client_sock.settimeout(2)
             print("Accepted connection from ", client_info)
             self.bluetooth_connected_status = True
 
@@ -164,16 +174,29 @@ else:
                         self.wifi_connected_status = False
                     elif command.command_type == AndroidBluetoothAction.WIFI_CONNECTED:
                         self.wifi_connected_status = True
-                    string_to_send = "STATUS/" + str(self.robot_ready_status) + "/" + str(self.wifi_connected_status)
-                    client_sock.send(str.encode(string_to_send))
                 #
-                data = client_sock.recv(2048)
-                if len(data) == 0:
-                    continue
-                else:
-                    # self.parse_android_message(data)
-                    # Send command to main thread
-                    print("received [%s]" % data)
+                try:
+                    data = client_sock.recv(2048)
+                    if len(data) == 0:
+                        pass
+                    else:
+                        # self.parse_android_message(data)
+                        # Send command to main thread
+                        print("received [%s]" % data)
+                except socket.timeout:
+                    pass
+                except:
+                    pass
+
+                try:
+                    string_to_send = "STATUS/" + str(self.robot_ready_status) + "/" + str(self.wifi_connected_status)
+                    print(string_to_send)
+                    client_sock.settimeout(2)
+                    client_sock.send(str.encode(string_to_send))
+                except socket.timeout:
+                    pass
+                except:
+                    pass
 
             print("stopping!")
             client_sock.close()
@@ -182,7 +205,7 @@ else:
 
         def parse_android_message(self, data):
             encoding = 'utf-8'
-            parsed_string = data..decode(encoding)
+            parsed_string = data.decode(encoding)
             command = parsed_string.split("/")
             self.parse_command_type(command, data)
 

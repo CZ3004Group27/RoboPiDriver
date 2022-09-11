@@ -1,11 +1,11 @@
-from enum import Enum
+from enum import IntEnum
 
 
-class Action(Enum):
+class Action(IntEnum):
     pass
 
 
-class RobotAction(Action):
+class RobotAction(IntEnum):
     FORWARD = 1
     BACKWARD = 2
     TURN_FORWARD_LEFT = 3
@@ -16,13 +16,15 @@ class RobotAction(Action):
     SET_OBSTACLE_POSITION = 8
     START_MISSION = 9
     RECEIVE_MISSION_INSTRUCTIONS = 10 # (list of moves, original string command)
+    WIFI_DISCONNECTED = 11
+    WIFI_CONNECTED = 12
 
 
-class OverrideAction(Action):
+class OverrideAction(IntEnum):
     STOP = 1
 
 
-class AndroidBluetoothAction(Action):
+class AndroidBluetoothAction(IntEnum):
     ROBOT_NOT_READY = 1
     ROBOT_READY = 2
     WIFI_DISCONNECTED = 3
@@ -32,7 +34,7 @@ class AndroidBluetoothAction(Action):
     SEND_IMAGE_WITH_RESULT = 7
 
 
-class WifiAction(Action):
+class WifiAction(IntEnum):
     START_MISSION = 1
 
 

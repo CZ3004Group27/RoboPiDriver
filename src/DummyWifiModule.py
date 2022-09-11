@@ -2,9 +2,10 @@ from multiprocessing import Process, Queue
 import os
 import socket
 from Action import *
-from CameraModule import CameraModule
+from DummyCameraModule import DummyCameraModule
 import signal
 import base64
+
 
 
 # receives movement instructions and image result from PC, sends to it map information
@@ -15,17 +16,15 @@ def send_image(image, conn):
     string_to_send = "PHOTODATA/" + base64.b64encode(image.tobytes()).decode("utf-8")
     conn.sendall(string_to_send.encode("utf-8"))
 
-
 def wifi_close_module():
     try:
         sock = socket.socket(socket.AF_INET,
-                                 socket.SOCK_STREAM)
+                         socket.SOCK_STREAM)
         sock.settimeout(2)
         sock.connect(("127.0.0.1", WifiModule.PORT))
         sock.close()
     except socket.timeout:
         pass
-
 
 class WifiModule(Process):
     HOST = ''  # Standard loopback interface address (localhost)
@@ -38,7 +37,7 @@ class WifiModule(Process):
         self.main_command_queue = main_command_queue
         self.robot_action_list = robot_action_list
         self.main_thread_override_queue = main_thread_override_queue
-        self.camera = CameraModule()
+        self.camera = DummyCameraModule()
         self.wifi_string_conv_dict = {"F": RobotAction.FORWARD,
                                       "B": RobotAction.BACKWARD,
                                       "L": RobotAction.TURN_FORWARD_LEFT,
@@ -49,7 +48,7 @@ class WifiModule(Process):
         self.wifi_command_dict = {"PHOTO": self.take_photo,
                                   "MOVEMENT": self.get_movement
                                   }
-        print("hello")
+        print("starting fake wifi module")
 
     # Setup behaviour
     # 1. Listen for wifi connection
@@ -64,39 +63,51 @@ class WifiModule(Process):
     def run(self):
         """Ignore CTRL+C in the worker process."""
         signal.signal(signal.SIGINT, signal.SIG_IGN)
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.bind((self.HOST, self.PORT))
-            s.listen()
-            conn, addr = s.accept()
-            conn.settimeout(2)
-            self.robot_action_list.put(Command(RobotAction.WIFI_CONNECTED, ""))
-            with conn:
-                print(f"Connected by {addr}")
-                print("wifi thread listening for commands")
-                while not self.stopped:
-                    if not self.stopped_queue.empty():
-                        command = self.stopped_queue.get()
-                        if command.command_type == OverrideAction.STOP:
-                            self.stopped = True
-                            break
-                    if not self.main_command_queue.empty():
-                        command = self.main_command_queue.get()
-                        if command.command_type == WifiAction.START_MISSION:
-                            self.send_start_mission_command(conn, command.data)
-                    # Get data from wifi connection
-                    try:
-                        data = conn.recv(2048)
-                        if len(data) == 0:
-                            pass
-                        else:
-                            self.parse_wifi_command(data, conn)
-                            print("received [%s]" % data)
-                    except socket.timeout:
-                        pass
 
-                print("stopping!")
+        server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server_sock.bind(("", self.PORT))
+        server_sock.listen(1)
+
+        port = server_sock.getsockname()[1]
+
+        print("Waiting for connection on fake wifi channel %d" % port)
+
+        conn, fd = server_sock.accept()
+        self.robot_action_list.put(Command(RobotAction.WIFI_CONNECTED,""))
+        conn.settimeout(2)
+        print("Accepted connection from ", fd)
+
+        print("wifi loop running")
+        print(f"Connected by {fd}")
+        print("wifi thread listening for commands")
+        while not self.stopped:
+            if not self.stopped_queue.empty():
+                command = self.stopped_queue.get()
+                if command.command_type == OverrideAction.STOP:
+                    self.stopped = True
+                    print("breaking")
+                    break
+            if not self.main_command_queue.empty():
+                command = self.main_command_queue.get()
+                if command.command_type == WifiAction.START_MISSION:
+                    self.send_start_mission_command(conn, command.data)
+            # Get data from wifi connection
+            try:
+                data = conn.recv(2048)
+                if len(data) == 0:
+                    pass
+                else:
+                    self.parse_wifi_command(data, conn)
+                    print("received [%s]" % data)
+            except socket.timeout:
+                pass
+
+        print("stopping!")
+        conn.close()
+        server_sock.close()
 
     def send_start_mission_command(self, conn, data):
+        print(data)
         conn.sendall(str.encode(data))
 
     def receive_photo_result_data(self, conn):
@@ -111,6 +122,7 @@ class WifiModule(Process):
         output = True
         encoding = 'utf-8'
         parsed_string = data.decode(encoding)
+        print(parsed_string)
         command = parsed_string.split("/")
         if command[0] == "ROBOT":
             output = False
