@@ -114,7 +114,7 @@ class AndroidLinkModule(Process):
                 if len(data) == 0:
                     pass
                 else:
-                    # self.parse_android_message(data)
+                    self.parse_android_message(data)
                     # Send command to main thread
                     print("received [%s]" % data)
             except socket.timeout:
@@ -148,19 +148,22 @@ class AndroidLinkModule(Process):
     def send_android_message(self, message):
         pass
 
-    def start_robot(self, command):
+    def start_robot(self, command, data):
         # Run command based on explore or fastest path
-        self.pathing_dict[command[1]](command)
+        print("starting mission")
+        self.pathing_dict[command[1]](command, data)
 
-    def move_robot(self, command):
+    def move_robot(self, command, data):
         movement_value = self.robot_move_dict[command[1]]
         self.main_command_queue.put(Command(movement_value, ""))
 
-    def stop_robot(self, command):
+    def stop_robot(self, command, data):
         self.main_thread_override_queue.put(Command(OverrideAction.STOP, ""))
 
     def parse_command_type(self, command, data):
         # Run command based on start/stop/move
+        print(command[0])
+        print(self.command_dict[command[0]])
         self.command_dict[command[0]](command, data)
 
     def set_robot_position(self, command, data):
@@ -174,10 +177,12 @@ class AndroidLinkModule(Process):
         self.robot_action_queue.put(Command(RobotAction.SET_ROBOT_POSITION_DIRECTION, robot_position_list))
 
     def start_explore(self, command, data):
+        print("starting explore")
         self.set_robot_position(command)
         self.start_mission(command, data)
 
     def start_path(self, command, data):
+        print("starting path")
         self.start_mission(command, data)
 
     def start_mission(self, command, data):
