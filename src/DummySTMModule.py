@@ -63,7 +63,7 @@ class STMModule:
             else:
                 new_x = new_x - 3
             new_direction = (new_direction + 1) % 4
-        elif move == RobotAction.TURN_FORWARD_RIGHT:
+        elif move == RobotAction.TURN_BACKWARD_RIGHT:
             moved = True
             print("moving backward right!")
             if robot_direction == 1 or robot_direction == 2:

@@ -107,10 +107,10 @@ class WifiModule(Process):
         server_sock.close()
 
     def send_start_mission_command(self, conn, data):
-        print(data)
+        print("trying to send start mission to wifi")
         try:
             conn.settimeout(2)
-            conn.sendall(str.encode(data))
+            conn.sendall(data)
         except:
             pass
 

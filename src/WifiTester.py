@@ -71,7 +71,7 @@ class window():
                 if len(data) == 0:
                     pass
                 else:
-                    print("received [%s]" % data)
+                    print("received [%s] from wifi" % data)
             except socket.timeout:
                 pass
         print("stopping")
@@ -85,7 +85,7 @@ class window():
                 if len(data) == 0:
                     pass
                 else:
-                    print("received [%s]" % data)
+                    print("received [%s] from bluetooth" % data)
             except socket.timeout:
                 pass
 

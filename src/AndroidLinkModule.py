@@ -174,6 +174,8 @@ else:
                         self.wifi_connected_status = False
                     elif command.command_type == AndroidBluetoothAction.WIFI_CONNECTED:
                         self.wifi_connected_status = True
+                    elif command.command_type == AndroidBluetoothAction.UPDATE_CURRENT_LOCATION:
+                        self.send_robot_position(client_sock, command.data)
                 #
                 try:
                     data = client_sock.recv(2048)
@@ -213,15 +215,16 @@ else:
         def send_android_message(self, message):
             pass
 
-        def start_robot(self, command):
+        def start_robot(self, command, data):
             # Run command based on explore or fastest path
             self.pathing_dict[command[1]](command)
 
-        def move_robot(self, command):
+        def move_robot(self, command, data):
             movement_value = self.robot_move_dict[command[1]]
-            self.main_command_queue.put(Command(movement_value, ""))
+            self.robot_action_queue.put(Command(movement_value, ""))
 
-        def stop_robot(self, command):
+        def stop_robot(self, command, data):
+            print("stopping robot")
             self.main_thread_override_queue.put(Command(OverrideAction.STOP, ""))
 
         def parse_command_type(self, command, data):
@@ -230,11 +233,12 @@ else:
 
         def set_robot_position(self, command, data):
             robot_position_info = map(str, command[2].replace('(', '').replace(')', '').split(','))
+            robot_position_info_list = list(robot_position_info)
 
             # list goes as: [x value, y value, robot direction]
-            robot_position_list = [int(robot_position_info[1]), int(robot_position_info[2]),
-                                   int(robot_position_info[3])]
-
+            robot_position_list = [int(robot_position_info_list[1]), int(robot_position_info_list[2]),
+                                   int(robot_position_info_list[3])]
+            print("setting robot position")
             # Set robot location in main thread
             self.robot_action_queue.put(Command(RobotAction.SET_ROBOT_POSITION_DIRECTION, robot_position_list))
 
@@ -247,3 +251,14 @@ else:
 
         def start_mission(self, command, data):
             self.robot_action_queue.put(Command(RobotAction.START_MISSION, data))
+
+        def send_robot_position(self, conn, list_data):
+            try:
+                string_to_send = "ROBOT_STATUS/" + str(list_data).replace('[', '(').replace(']', ')')
+                print(string_to_send)
+                conn.settimeout(2)
+                conn.send(str.encode(string_to_send))
+            except socket.timeout:
+                pass
+            except:
+                pass

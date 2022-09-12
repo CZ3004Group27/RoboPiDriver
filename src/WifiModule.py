@@ -97,7 +97,12 @@ class WifiModule(Process):
                 print("stopping!")
 
     def send_start_mission_command(self, conn, data):
-        conn.sendall(str.encode(data))
+        print("trying to send start mission to wifi")
+        try:
+            conn.settimeout(2)
+            conn.sendall(data)
+        except:
+            pass
 
     def receive_photo_result_data(self, conn):
         pass

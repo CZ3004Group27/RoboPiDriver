@@ -22,6 +22,7 @@ class RobotAction(IntEnum):
 
 class OverrideAction(IntEnum):
     STOP = 1
+    QUIT = 2
 
 
 class AndroidBluetoothAction(IntEnum):

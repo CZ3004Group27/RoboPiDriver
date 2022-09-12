@@ -8,7 +8,7 @@ import socket
 
 from DummyAndroidLinkModule import *
 from DummyWifiModule import *
-from DummtSTMModule import *
+from DummySTMModule import *
 
 if __name__ == '__main__':
     # Initialise Variables
@@ -47,7 +47,11 @@ if __name__ == '__main__':
             # Check if there are any override commands for the threads
             if not override_queue.empty():
                 override_action = override_queue.get()
-                if override_action == OverrideAction.STOP:
+                if override_action.command_type == OverrideAction.STOP:
+                    print("stop command received")
+                    while not action_list.empty():
+                        action_list.get()
+                elif override_action.command_type == OverrideAction.QUIT:
                     wifi_stopped_queue.put(True)
                     android_stopped_queue.put(True)
                     stopped = True
@@ -55,17 +59,18 @@ if __name__ == '__main__':
             # Check and run one move per loop
             if not action_list.empty():
                 command = action_list.get()
+                print("action received")
+                print(command.command_type)
+                print(command.data)
                 # if action is a movement action
                 if command.command_type.value <= RobotAction.TURN_BACKWARD_RIGHT.value:
-                    x, y, r = STMModule.process_move(command.command_type, robot_position_x, robot_position_y,
+                    x, y, r = stm.process_move(command.command_type, robot_position_x, robot_position_y,
                                                      robot_direction)
                     robot_position_x = x
                     robot_position_y = y
                     robot_direction = r
 
                     temp_list = [robot_position_x, robot_position_y, robot_direction]
-
-                    wifi_command_queue.put(Command(WifiAction.UPDATE_CURRENT_LOCATION, temp_list))
                     android_command_queue.put(Command(AndroidBluetoothAction.UPDATE_CURRENT_LOCATION, temp_list))
 
                 elif command.command_type == RobotAction.SET_ROBOT_POSITION_DIRECTION:
@@ -87,6 +92,8 @@ if __name__ == '__main__':
         android_stopped_queue.put(Command(OverrideAction.STOP, 0))
         wifi_close_module()
         android_close_module()
+    except Exception as e:
+        print(e)
 
     print("waiting for android to stop")
     android_thread.join()
