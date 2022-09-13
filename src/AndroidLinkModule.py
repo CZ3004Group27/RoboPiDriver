@@ -176,6 +176,8 @@ else:
                         self.wifi_connected_status = True
                     elif command.command_type == AndroidBluetoothAction.UPDATE_CURRENT_LOCATION:
                         self.send_robot_position(client_sock, command.data)
+                    elif command.command_type == AndroidBluetoothAction.SEND_IMAGE_WITH_RESULT:
+                        self.send_android_message(command.data, client_sock)
                 #
                 try:
                     data = client_sock.recv(2048)
@@ -211,9 +213,16 @@ else:
             command = parsed_string.split("/")
             self.parse_command_type(command, data)
 
-        # TODO
-        def send_android_message(self, message):
-            pass
+        def send_android_message(self, message, conn):
+            try:
+                string_to_send = message
+                print(string_to_send)
+                conn.settimeout(2)
+                conn.send(str.encode(string_to_send))
+            except socket.timeout:
+                pass
+            except:
+                pass
 
         def start_robot(self, command, data):
             # Run command based on explore or fastest path
