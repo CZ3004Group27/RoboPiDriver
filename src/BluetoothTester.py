@@ -34,6 +34,15 @@ def buttonCallBack():
     sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
     sock.connect((HOST, PORT))
     sock.send(b"Hello, world")
+    sock.settimeout(2)
+    try:
+        data = sock.recv(2048)
+        if len(data) == 0:
+            pass
+        else:
+            print("received [%s] from bluetooth" % data)
+    except socket.timeout:
+        pass
 
 
 B = Button(window, text="send test", command=buttonCallBack)
