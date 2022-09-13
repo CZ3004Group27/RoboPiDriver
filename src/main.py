@@ -81,6 +81,8 @@ if __name__ == '__main__':
                 elif command.command_type == RobotAction.SET_OBSTACLE_POSITION:
                     obstacle_position_x = command.data[0]
                     obstacle_position_y = command.data[1]
+                elif command.command_type == RobotAction.SEND_TARGET_ID:
+                    android_command_queue.put(Command(AndroidBluetoothAction.SEND_IMAGE_WITH_RESULT, command.data))
                 elif command.command_type == RobotAction.START_MISSION:
                     wifi_command_queue.put(Command(WifiAction.START_MISSION, command.data))
                 elif command.command_type == RobotAction.WIFI_CONNECTED:

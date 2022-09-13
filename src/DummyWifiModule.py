@@ -7,7 +7,6 @@ import signal
 import base64
 
 
-
 # receives movement instructions and image result from PC, sends to it map information
 
 
@@ -16,15 +15,17 @@ def send_image(image, conn):
     string_to_send = "PHOTODATA/" + base64.b64encode(image.tobytes()).decode("utf-8")
     conn.sendall(string_to_send.encode("utf-8"))
 
+
 def wifi_close_module():
     try:
         sock = socket.socket(socket.AF_INET,
-                         socket.SOCK_STREAM)
+                             socket.SOCK_STREAM)
         sock.settimeout(2)
         sock.connect(("127.0.0.1", WifiModule.PORT))
         sock.close()
     except socket.timeout:
         pass
+
 
 class WifiModule(Process):
     HOST = ''  # Standard loopback interface address (localhost)
@@ -46,7 +47,8 @@ class WifiModule(Process):
                                       "BL": RobotAction.TURN_BACKWARD_LEFT
                                       }
         self.wifi_command_dict = {"PHOTO": self.take_photo,
-                                  "MOVEMENT": self.get_movement
+                                  "MOVEMENTS": self.get_movement,
+                                  "TARGET": self.get_target_id
                                   }
         print("starting fake wifi module")
 
@@ -73,7 +75,7 @@ class WifiModule(Process):
         print("Waiting for connection on fake wifi channel %d" % port)
 
         conn, fd = server_sock.accept()
-        self.robot_action_list.put(Command(RobotAction.WIFI_CONNECTED,""))
+        self.robot_action_list.put(Command(RobotAction.WIFI_CONNECTED, ""))
         conn.settimeout(2)
         print("Accepted connection from ", fd)
 
@@ -117,7 +119,7 @@ class WifiModule(Process):
     def receive_photo_result_data(self, conn):
         pass
 
-    def take_photo(self, command, conn):
+    def take_photo(self, raw_command_string, command, conn):
         photo = self.camera.take_picture()
         # SEND PICTURE
         send_image(photo, conn)
@@ -134,7 +136,7 @@ class WifiModule(Process):
             move_list = list()
             self.robot_action_list.put(Command(RobotAction.RECEIVE_MISSION_INSTRUCTIONS, (move_list, data)))
 
-    def get_movement(self, command, conn):
+    def get_movement(self, raw_command_string, command, conn):
         obstacle = command[1].split("-")
         self.robot_action_list.put(Command(RobotAction.SET_OBSTACLE_POSITION, obstacle))
         # TODO:Get list of movements and send to main thread
@@ -142,4 +144,7 @@ class WifiModule(Process):
     def parse_wifi_command(self, data, conn):
         raw_string = data.decode("utf-8")
         command = raw_string.split("/")
-        self.wifi_command_dict[command[0]](command, conn)
+        self.wifi_command_dict[command[0]](raw_string, command, conn)
+
+    def get_target_id(self, raw_command_string, command, conn):
+        self.robot_action_list.put(Command(RobotAction.SEND_TARGET_ID, raw_command_string))
