@@ -64,8 +64,8 @@ if __name__ == '__main__':
                 print(command.data)
                 # if action is a movement action
                 if command.command_type.value <= RobotAction.TURN_BACKWARD_RIGHT.value:
-                    x, y, r = stm.process_move(command.command_type, robot_position_x, robot_position_y,
-                                                     robot_direction)
+                    x, y, r, moved = stm.process_move(command.command_type, robot_position_x, robot_position_y,
+                                                      robot_direction)
                     robot_position_x = x
                     robot_position_y = y
                     robot_direction = r
@@ -86,7 +86,7 @@ if __name__ == '__main__':
                 elif command.command_type == RobotAction.START_MISSION:
                     wifi_command_queue.put(Command(WifiAction.START_MISSION, command.data))
                 elif command.command_type == RobotAction.SEND_MISSION_PLAN:
-                    android_command_queue.put(Command(AndroidBluetoothAction.SEND_MISSION_PLAN,command.data))
+                    android_command_queue.put(Command(AndroidBluetoothAction.SEND_MISSION_PLAN, command.data))
                 elif command.command_type == RobotAction.WIFI_CONNECTED:
                     android_command_queue.put(Command(AndroidBluetoothAction.WIFI_CONNECTED, ""))
                 else:

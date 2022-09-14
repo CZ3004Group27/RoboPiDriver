@@ -1,0 +1,2 @@
+class RobotMovementError(Exception):
+    pass
