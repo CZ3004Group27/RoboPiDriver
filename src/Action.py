@@ -16,7 +16,7 @@ class RobotAction(IntEnum):
     SET_OBSTACLE_POSITION = 8
     SEND_TARGET_ID = 9
     START_MISSION = 10
-    RECEIVE_MISSION_INSTRUCTIONS = 11 # (list of moves, original string command)
+    SEND_MISSION_PLAN = 11 # (list of moves, original string command)
     WIFI_DISCONNECTED = 12
     WIFI_CONNECTED = 13
 
@@ -34,6 +34,7 @@ class AndroidBluetoothAction(IntEnum):
     UPDATE_CURRENT_ACTION = 5
     UPDATE_CURRENT_LOCATION = 6
     SEND_IMAGE_WITH_RESULT = 7
+    SEND_MISSION_PLAN = 8
 
 
 class WifiAction(IntEnum):

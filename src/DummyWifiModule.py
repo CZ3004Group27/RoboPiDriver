@@ -48,7 +48,8 @@ class WifiModule(Process):
                                       }
         self.wifi_command_dict = {"PHOTO": self.take_photo,
                                   "MOVEMENTS": self.get_movement,
-                                  "TARGET": self.get_target_id
+                                  "TARGET": self.get_target_id,
+                                  "ROBOT": self.get_movement_plan
                                   }
         print("starting fake wifi module")
 
@@ -119,24 +120,15 @@ class WifiModule(Process):
     def receive_photo_result_data(self, conn):
         pass
 
-    def take_photo(self, raw_command_string, command, conn):
+    def take_photo(self, data, command, conn):
         photo = self.camera.take_picture()
         # SEND PICTURE
         send_image(photo, conn)
 
-    def todo_receive_mission_instructions(self, data):
-        output = True
-        encoding = 'utf-8'
-        parsed_string = data.decode(encoding)
-        print(parsed_string)
-        command = parsed_string.split("/")
-        if command[0] == "ROBOT":
-            output = False
-            # Parse movement into list of moves
-            move_list = list()
-            self.robot_action_list.put(Command(RobotAction.RECEIVE_MISSION_INSTRUCTIONS, (move_list, data)))
+    def get_movement_plan(self, data, command, conn):
+        self.robot_action_list.put(Command(RobotAction.SEND_MISSION_PLAN, data))
 
-    def get_movement(self, raw_command_string, command, conn):
+    def get_movement(self, data, command, conn):
         obstacle = command[1].split("-")
         self.robot_action_list.put(Command(RobotAction.SET_OBSTACLE_POSITION, obstacle))
         # TODO:Get list of movements and send to main thread
@@ -144,7 +136,7 @@ class WifiModule(Process):
     def parse_wifi_command(self, data, conn):
         raw_string = data.decode("utf-8")
         command = raw_string.split("/")
-        self.wifi_command_dict[command[0]](raw_string, command, conn)
+        self.wifi_command_dict[command[0]](data, command, conn)
 
-    def get_target_id(self, raw_command_string, command, conn):
-        self.robot_action_list.put(Command(RobotAction.SEND_TARGET_ID, raw_command_string))
+    def get_target_id(self, data, command, conn):
+        self.robot_action_list.put(Command(RobotAction.SEND_TARGET_ID, data))

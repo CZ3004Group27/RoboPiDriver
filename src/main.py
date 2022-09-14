@@ -85,6 +85,8 @@ if __name__ == '__main__':
                     android_command_queue.put(Command(AndroidBluetoothAction.SEND_IMAGE_WITH_RESULT, command.data))
                 elif command.command_type == RobotAction.START_MISSION:
                     wifi_command_queue.put(Command(WifiAction.START_MISSION, command.data))
+                elif command.command_type == RobotAction.SEND_MISSION_PLAN:
+                    android_command_queue.put(Command(AndroidBluetoothAction.SEND_MISSION_PLAN,command.data))
                 elif command.command_type == RobotAction.WIFI_CONNECTED:
                     android_command_queue.put(Command(AndroidBluetoothAction.WIFI_CONNECTED, ""))
                 else:

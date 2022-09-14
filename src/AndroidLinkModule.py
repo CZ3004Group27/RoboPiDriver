@@ -215,10 +215,8 @@ else:
 
         def send_android_message(self, message, conn):
             try:
-                string_to_send = message
-                print(string_to_send)
                 conn.settimeout(2)
-                conn.send(str.encode(string_to_send))
+                conn.send(message)
             except socket.timeout:
                 pass
             except:

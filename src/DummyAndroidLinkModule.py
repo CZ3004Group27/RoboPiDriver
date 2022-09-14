@@ -113,6 +113,8 @@ class AndroidLinkModule(Process):
                     self.send_robot_position(client_sock, command.data)
                 elif command.command_type == AndroidBluetoothAction.SEND_IMAGE_WITH_RESULT:
                     self.send_android_message(command.data, client_sock)
+                elif command.command_type == AndroidBluetoothAction.SEND_MISSION_PLAN:
+                    self.send_android_message(command.data, client_sock)
             #
             try:
                 data = client_sock.recv(2048)
@@ -151,10 +153,8 @@ class AndroidLinkModule(Process):
 
     def send_android_message(self, message, conn):
         try:
-            string_to_send = message
-            print(string_to_send)
             conn.settimeout(2)
-            conn.send(str.encode(string_to_send))
+            conn.send(message)
         except socket.timeout:
             pass
         except:

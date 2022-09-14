@@ -21,6 +21,7 @@ class Server:
         print("Waiting for connection on RFCOMM channel %d" % port)
 
         client_sock, client_info = server_sock.accept()
+        #TODO restart socket if closed
         while True:
             print("Accepted connection from ", client_info)
             data = client_sock.recv(2048)
