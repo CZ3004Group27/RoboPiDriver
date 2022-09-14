@@ -30,6 +30,7 @@ if __name__ == '__main__':
     robot_direction = 0
     obstacle_position_x = -1
     obstacle_position_y = -1
+    movement_counter = 0
 
     # Initialise Wifi thread
     print("starting wifi module")
@@ -69,9 +70,11 @@ if __name__ == '__main__':
                     robot_position_x = x
                     robot_position_y = y
                     robot_direction = r
+                    if moved:
+                        movement_counter +=1
 
                     temp_list = [robot_position_x, robot_position_y, robot_direction]
-                    android_command_queue.put(Command(AndroidBluetoothAction.UPDATE_CURRENT_LOCATION, temp_list))
+                    android_command_queue.put(Command(AndroidBluetoothAction.UPDATE_DONE, movement_counter))
 
                 elif command.command_type == RobotAction.SET_ROBOT_POSITION_DIRECTION:
                     temp_tuple = command.data
@@ -84,6 +87,7 @@ if __name__ == '__main__':
                 elif command.command_type == RobotAction.SEND_TARGET_ID:
                     android_command_queue.put(Command(AndroidBluetoothAction.SEND_IMAGE_WITH_RESULT, command.data))
                 elif command.command_type == RobotAction.START_MISSION:
+                    movement_counter = 0
                     wifi_command_queue.put(Command(WifiAction.START_MISSION, command.data))
                 elif command.command_type == RobotAction.SEND_MISSION_PLAN:
                     android_command_queue.put(Command(AndroidBluetoothAction.SEND_MISSION_PLAN, command.data))
