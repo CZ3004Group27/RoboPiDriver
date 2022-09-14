@@ -2,6 +2,9 @@ from tkinter import *
 from functools import partial
 from threading import Thread
 import socket
+import base64
+import cv2
+import numpy as np
 class window():
     def __init__(self):
         self.window = Tk()
@@ -60,7 +63,26 @@ class window():
         print(PORT)
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.connect((HOST, PORT))
-            s.sendall(b"PHOTO/PHOTO")
+            s.send(b"PHOTO/PHOTO")
+            while not self.stopped:
+                try:
+                    data = s.recv(2048)
+                    if len(data) == 0:
+                        pass
+                    else:
+                        print("received [%s] from wifi" % data)
+                        image_string = data.decode("utf-8")
+                        if image_string.startswith("PHOTODATA/"):
+                            image_string.replace(image_string[:10], '')
+                            image_string_bytes = base64.b64decode(image_string)
+                            jpg_as_np = np.frombuffer(image_string_bytes, dtype=np.uint8)
+                            img = cv2.imdecode(jpg_as_np, cv2.IMREAD_COLOR)
+
+                            # DISPLAY IMAGE
+                            cv2.imshow('image', img)
+                            cv2.waitKey(0)
+                except socket.timeout:
+                    pass
 
     def connect_fake_wifi_server(self):
         self.fake_wifi_socket.connect(("127.0.0.1", 25565))
