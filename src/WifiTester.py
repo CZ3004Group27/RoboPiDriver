@@ -67,21 +67,28 @@ class window():
             s.send(b"PHOTO/PHOTO")
             while not self.stopped:
                 try:
-                    data = s.recv(2048)
+                    data = s.recv(4)
                     if len(data) == 0:
                         pass
                     else:
                         print("received [%s] from wifi" % data)
-                        image_string = data.decode("utf-8")
-                        if image_string.startswith("PHOTODATA/"):
-                            image_string.replace(image_string[:10], '')
-                            image_string_bytes = base64.b64decode(image_string)
-                            jpg_as_np = np.frombuffer(image_string_bytes, dtype=np.uint8)
-                            img = cv2.imdecode(jpg_as_np, cv2.IMREAD_COLOR)
-
-                            # DISPLAY IMAGE
-                            cv2.imshow('image', img)
-                            cv2.waitKey(0)
+                        number_of_bytes = int.from_bytes(data, 'big')
+                        print(number_of_bytes)
+                        received_packets = b''
+                        bytes_to_receive = number_of_bytes
+                        while len(received_packets) < number_of_bytes:
+                            packet = s.recv(bytes_to_receive)
+                            bytes_to_receive -= len(packet)
+                            received_packets += packet
+                        print(received_packets)
+                        image_string = received_packets.decode("utf-8")
+                        print(image_string)
+                        img_bytes = base64.b64decode(image_string)
+                        jpg_as_np = np.frombuffer(img_bytes, dtype=np.uint8)
+                        img = cv2.imdecode(jpg_as_np, cv2.IMREAD_COLOR)
+                        # DISPLAY IMAGE
+                        cv2.imshow('s', img)
+                        cv2.waitKey(0)
                 except socket.timeout:
                     pass
 

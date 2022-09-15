@@ -27,11 +27,17 @@ class Server:
                     if command[0] == "PHOTO":
                         print("phototaking command received!")
                         image = self.camera.take_picture()
-
-                        string_to_send = "PHOTODATA/" + base64.b64encode(image.tobytes()).decode("utf-8")
-                        print("sending photo image")
-                        print(string_to_send)
-                        conn.sendall(string_to_send.encode("utf-8"))
+                        if image is not None:
+                            buffer = cv2.imencode('.jpg', image)[1].tobytes()
+                            string_to_send = base64.b64encode(buffer).decode("utf-8")
+                            #string_to_send = "PHOTODATA/" + base64.b64encode(buffer).decode("utf-8")
+                            bytes_to_send = string_to_send.encode("utf-8")
+                            number_of_bytes = len(bytes_to_send)
+                            print(number_of_bytes)
+                            packet_length = number_of_bytes.to_bytes(4,'big')
+                            print("sending photo image")
+                            packet_length += bytes_to_send
+                            conn.send(packet_length)
                     print("received [%s]" % data)
 
 
