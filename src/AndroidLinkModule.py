@@ -197,7 +197,7 @@ else:
                     string_to_send = "STATUS/" + str(self.robot_ready_status) + "/" + str(self.wifi_connected_status)
                     print(string_to_send)
                     client_sock.settimeout(2)
-                    client_sock.send(str.encode(string_to_send))
+                    client_sock.sendall(str.encode(string_to_send))
                 except socket.timeout:
                     pass
                 except:
@@ -217,7 +217,7 @@ else:
         def send_android_message(self, message, conn):
             try:
                 conn.settimeout(2)
-                conn.send(message)
+                conn.sendall(message)
             except socket.timeout:
                 pass
             except:
