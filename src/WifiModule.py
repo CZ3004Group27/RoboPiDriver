@@ -20,7 +20,7 @@ def send_message_with_size(conn, data):
 
 def send_image(image, conn):
     # Send image
-    string_to_send = "PHOTODATA/" + base64.b64encode(image.tobytes()).decode("utf-8")
+    string_to_send = "PHOTODATA/" + base64.b64encode(cv2.imencode('.jpg', image)[1].tobytes()).decode("utf-8")
     send_message_with_size(conn, string_to_send.encode("utf-8"))
 
 def receive_message_with_size(conn):

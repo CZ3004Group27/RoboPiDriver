@@ -93,19 +93,22 @@ class window():
             s.connect((HOST, PORT))
             s.settimeout(2)
             s.send(b"PHOTO/PHOTO")
-            while not self.stopped:
-                try:
-                    data = receive_message_with_size(s)
-                    if data is not None:
-                        print("received [%s] from wifi" % data)
-                        img_bytes = base64.b64decode(data)
-                        jpg_as_np = np.frombuffer(img_bytes, dtype=np.uint8)
-                        img = cv2.imdecode(jpg_as_np, cv2.IMREAD_COLOR)
-                        # DISPLAY IMAGE
-                        cv2.imshow('s', img)
-                        cv2.waitKey(0)
-                except socket.timeout:
-                    pass
+            try:
+                data = receive_message_with_size(s)
+                if data is not None:
+                    #print("received [%s] from wifi" % data)
+                    raw_string = data.decode("utf-8")
+                    raw_string = raw_string[10:]
+                    img_bytes = base64.b64decode(raw_string.encode("utf-8"))
+                    jpg_as_np = np.frombuffer(img_bytes, dtype=np.uint8)
+                    img = cv2.imdecode(jpg_as_np, cv2.IMREAD_COLOR)
+                    ## DISPLAY IMAGE
+                    cv2.imshow('s', img)
+                    #im_cv = cv2.imread("dummycatimage.jpg")
+
+                    #print('Same image: {}'.format(np.all(im_cv == img)))
+            except socket.timeout:
+                pass
 
     def connect_fake_wifi_server(self):
         self.fake_wifi_socket.connect(("127.0.0.1", 25565))
