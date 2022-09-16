@@ -38,7 +38,7 @@ class Server:
                             packet_length = struct.pack("!I", number_of_bytes)
                             print("sending photo image")
                             packet_length += bytes_to_send
-                            conn.send(packet_length)
+                            conn.sendall(packet_length)
                     print("received [%s]" % data)
 
 

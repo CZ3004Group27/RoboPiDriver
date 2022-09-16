@@ -93,23 +93,10 @@ class window():
             s.send(b"PHOTO/PHOTO")
             while not self.stopped:
                 try:
-                    data = s.recv(4)
-                    if len(data) == 0:
-                        pass
-                    else:
+                    data = receive_message_with_size(s)
+                    if data is not None:
                         print("received [%s] from wifi" % data)
-                        number_of_bytes = struct.unpack("!I",data)[0]
-                        print(number_of_bytes)
-                        received_packets = b''
-                        bytes_to_receive = number_of_bytes
-                        while len(received_packets) < number_of_bytes:
-                            packet = s.recv(bytes_to_receive)
-                            bytes_to_receive -= len(packet)
-                            received_packets += packet
-                        print(received_packets)
-                        image_string = received_packets.decode("utf-8")
-                        print(image_string)
-                        img_bytes = base64.b64decode(image_string)
+                        img_bytes = base64.b64decode(data)
                         jpg_as_np = np.frombuffer(img_bytes, dtype=np.uint8)
                         img = cv2.imdecode(jpg_as_np, cv2.IMREAD_COLOR)
                         # DISPLAY IMAGE
