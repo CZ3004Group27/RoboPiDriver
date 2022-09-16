@@ -66,8 +66,8 @@ class WifiModule(Process):
         self.camera = CameraModule()
         self.wifi_string_conv_dict = {"F": RobotAction.FORWARD,
                                       "B": RobotAction.BACKWARD,
-                                      "L": RobotAction.TURN_FORWARD_LEFT,
-                                      "R": RobotAction.TURN_FORWARD_RIGHT,
+                                      "FL": RobotAction.TURN_FORWARD_LEFT,
+                                      "FR": RobotAction.TURN_FORWARD_RIGHT,
                                       "BR": RobotAction.TURN_BACKWARD_RIGHT,
                                       "BL": RobotAction.TURN_BACKWARD_LEFT
                                       }
@@ -158,7 +158,8 @@ class WifiModule(Process):
     def get_movement(self, data, command, conn):
         obstacle = command[1].split("-")
         self.robot_action_list.put(Command(RobotAction.SET_OBSTACLE_POSITION, obstacle))
-        # TODO:Get list of movements and send to main thread
+        # Get list of movements and send to main thread
+        self.robot_action_list.put(Command(RobotAction.SET_MOVEMENTS, obstacle))
 
     def parse_wifi_command(self, data, conn):
         raw_string = data.decode("utf-8")

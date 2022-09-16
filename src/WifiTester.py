@@ -141,11 +141,11 @@ class window():
 
     def send_wifi_message(self):
         message = self.message_text_box.get("1.0", 'end-1c')
-        self.fake_wifi_socket.sendall(message.encode("utf-8"))
+        send_message_with_size(self.fake_wifi_socket, message.encode("utf-8"))
 
     def send_bluetooth_message(self):
         message = self.message_text_box.get("1.0", 'end-1c')
-        self.fake_bluetooth_socket.sendall(message.encode("utf-8"))
+        send_message_with_size(self.fake_bluetooth_socket, message.encode("utf-8"))
 
     def quit(self):
         self.stopped = True

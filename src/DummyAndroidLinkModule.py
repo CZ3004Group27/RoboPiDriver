@@ -140,9 +140,9 @@ class AndroidLinkModule(Process):
 
                 try:
                     string_to_send = "STATUS/" + str(self.robot_ready_status) + "/" + str(self.wifi_connected_status)
-                    print(string_to_send)
                     client_sock.settimeout(2)
                     client_sock.sendall(str.encode(string_to_send))
+                    print(string_to_send)
                 except socket.timeout:
                     pass
                 except:

@@ -23,7 +23,13 @@ if __name__ == '__main__':
     android_command_queue = Queue()
     action_list = Queue()
     obstacle_with_direction_list = list()
-
+    movement_string_conv_dict = {"F": RobotAction.FORWARD,
+                                 "B": RobotAction.BACKWARD,
+                                 "FL": RobotAction.TURN_FORWARD_LEFT,
+                                 "FR": RobotAction.TURN_FORWARD_RIGHT,
+                                 "BR": RobotAction.TURN_BACKWARD_RIGHT,
+                                 "BL": RobotAction.TURN_BACKWARD_LEFT
+                                 }
 
     image = None
     robot_position_x = 0
@@ -85,6 +91,10 @@ if __name__ == '__main__':
                 elif command.command_type == RobotAction.SET_OBSTACLE_POSITION:
                     obstacle_position_x = command.data[0]
                     obstacle_position_y = command.data[1]
+                elif command.command_type == RobotAction.SET_MOVEMENTS:
+                    for move in command.data:
+                        print(movement_string_conv_dict[move])
+                        action_list.put(Command(movement_string_conv_dict[move], ""))
                 elif command.command_type == RobotAction.SEND_TARGET_ID:
                     android_command_queue.put(Command(AndroidBluetoothAction.SEND_IMAGE_WITH_RESULT, command.data))
                 elif command.command_type == RobotAction.START_MISSION:
