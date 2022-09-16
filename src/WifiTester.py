@@ -5,6 +5,7 @@ import socket
 import base64
 import cv2
 import numpy as np
+import struct
 class window():
     def __init__(self):
         self.window = Tk()
@@ -72,7 +73,7 @@ class window():
                         pass
                     else:
                         print("received [%s] from wifi" % data)
-                        number_of_bytes = int.from_bytes(data, 'big')
+                        number_of_bytes = struct.unpack("!I",data)
                         print(number_of_bytes)
                         received_packets = b''
                         bytes_to_receive = number_of_bytes

@@ -2,6 +2,7 @@ from CameraModule import CameraModule
 import socket
 import cv2
 import base64
+import struct
 
 
 class Server:
@@ -34,7 +35,7 @@ class Server:
                             bytes_to_send = string_to_send.encode("utf-8")
                             number_of_bytes = len(bytes_to_send)
                             print(number_of_bytes)
-                            packet_length = number_of_bytes.to_bytes(4,'big')
+                            packet_length = struct.pack("!I", number_of_bytes)
                             print("sending photo image")
                             packet_length += bytes_to_send
                             conn.send(packet_length)

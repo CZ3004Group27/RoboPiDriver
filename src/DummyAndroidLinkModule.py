@@ -51,6 +51,12 @@ class AndroidLinkModule(Process):
             "EXPLORE": self.start_explore,
             "PATH": self.start_path
         }
+        self.direction_conv_dict = {
+            "0": 0,
+            "180": 2,
+            "-90": 1,
+            "90": 3
+        }
 
     # Setup behaviour
     # 1. Listen for bluetooth connection
@@ -184,7 +190,7 @@ class AndroidLinkModule(Process):
 
         # list goes as: [x value, y value, robot direction]
         robot_position_list = [int(robot_position_info_list[1]), int(robot_position_info_list[2]),
-                               int(robot_position_info_list[3])]
+                               self.direction_conv_dict[robot_position_info_list[3]]]
         print("setting robot position")
         # Set robot location in main thread
         self.robot_action_queue.put(Command(RobotAction.SET_ROBOT_POSITION_DIRECTION, robot_position_list))

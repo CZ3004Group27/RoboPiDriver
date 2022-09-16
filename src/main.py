@@ -24,6 +24,7 @@ if __name__ == '__main__':
     action_list = Queue()
     obstacle_with_direction_list = list()
 
+
     image = None
     robot_position_x = 0
     robot_position_y = 0
@@ -71,7 +72,7 @@ if __name__ == '__main__':
                     robot_position_y = y
                     robot_direction = r
                     if moved:
-                        movement_counter +=1
+                        movement_counter += 1
 
                     temp_list = [robot_position_x, robot_position_y, robot_direction]
                     android_command_queue.put(Command(AndroidBluetoothAction.UPDATE_DONE, movement_counter))

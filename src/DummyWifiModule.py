@@ -51,6 +51,12 @@ class WifiModule(Process):
                                   "TARGET": self.get_target_id,
                                   "ROBOT": self.get_movement_plan
                                   }
+        self.direction_conv_dict = {
+            "0": 0,
+            "180": 2,
+            "-90": 1,
+            "90": 3
+        }
         print("starting fake wifi module")
 
     # Setup behaviour
