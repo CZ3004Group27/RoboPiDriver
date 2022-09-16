@@ -27,24 +27,7 @@ def send_message_with_size(conn, data):
     packet_length = struct.pack("!I", number_of_bytes)
     packet_length += data
     conn.sendall(packet_length)
-def receive_message_with_size(conn):
-    try:
-        data = conn.recv(4)
-        if len(data) == 0:
-            return None
-        else:
-            number_of_bytes = struct.unpack("!I", data)[0]
-            received_packets = b''
-            bytes_to_receive = number_of_bytes
-            while len(received_packets) < number_of_bytes:
-                packet = conn.recv(bytes_to_receive)
-                bytes_to_receive -= len(packet)
-                received_packets += packet
-            return received_packets
-    except socket.timeout:
-        return None
-    except:
-        return None
+
 
 def send_image(image, conn):
     # Send image
@@ -82,6 +65,7 @@ class WifiModule(Process):
             "-90": 1,
             "90": 3
         }
+        self.connection_closed = False
         print("starting fake wifi module")
 
     # Setup behaviour
@@ -104,35 +88,38 @@ class WifiModule(Process):
 
         port = server_sock.getsockname()[1]
 
-        print("Waiting for connection on fake wifi channel %d" % port)
-
-        conn, fd = server_sock.accept()
-        self.robot_action_list.put(Command(RobotAction.WIFI_CONNECTED, ""))
-        print("Accepted connection from ", fd)
-
-        print("wifi loop running")
-        print(f"Connected by {fd}")
-        print("wifi thread listening for commands")
         while not self.stopped:
-            if not self.stopped_queue.empty():
-                command = self.stopped_queue.get()
-                if command.command_type == OverrideAction.STOP:
-                    self.stopped = True
-                    print("breaking")
-                    break
-            if not self.main_command_queue.empty():
-                command = self.main_command_queue.get()
-                if command.command_type == WifiAction.START_MISSION:
-                    self.send_start_mission_command(conn, command.data)
-            # Get data from wifi connection
-            conn.settimeout(2)
-            data = receive_message_with_size(conn)
-            if data is not None:
-                self.parse_wifi_command(data, conn)
-                print("received [%s]" % data)
+            print("Waiting for connection on fake wifi channel %d" % port)
+            conn, fd = server_sock.accept()
+            self.robot_action_list.put(Command(RobotAction.WIFI_CONNECTED, ""))
+            self.connection_closed = False
+            print("Accepted connection from ", fd)
 
+            print("wifi loop running")
+            print(f"Connected by {fd}")
+            print("wifi thread listening for commands")
+            while not self.connection_closed:
+                if not self.stopped_queue.empty():
+                    command = self.stopped_queue.get()
+                    if command.command_type == OverrideAction.STOP:
+                        self.stopped = True
+                        print("breaking")
+                        break
+                if not self.main_command_queue.empty():
+                    command = self.main_command_queue.get()
+                    if command.command_type == WifiAction.START_MISSION:
+                        self.send_start_mission_command(conn, command.data)
+                # Get data from wifi connection
+                conn.settimeout(2)
+                data = self.receive_message_with_size(conn)
+                if data is not None:
+                    self.parse_wifi_command(data, conn)
+                    print("received [%s]" % data)
+
+            print("finished connection")
+            self.robot_action_list.put(Command(RobotAction.WIFI_DISCONNECTED, ""))
+            conn.close()
         print("stopping!")
-        conn.close()
         server_sock.close()
 
     def send_start_mission_command(self, conn, data):
@@ -166,3 +153,24 @@ class WifiModule(Process):
 
     def get_target_id(self, data, command, conn):
         self.robot_action_list.put(Command(RobotAction.SEND_TARGET_ID, data))
+
+    def receive_message_with_size(self, conn):
+        try:
+            data = conn.recv(4)
+            if len(data) == 0:
+                self.connection_closed = True
+                return None
+            else:
+                number_of_bytes = struct.unpack("!I", data)[0]
+                received_packets = b''
+                bytes_to_receive = number_of_bytes
+                while len(received_packets) < number_of_bytes:
+                    packet = conn.recv(bytes_to_receive)
+                    bytes_to_receive -= len(packet)
+                    received_packets += packet
+                return received_packets
+        except socket.timeout:
+            return None
+        except:
+            return None
+

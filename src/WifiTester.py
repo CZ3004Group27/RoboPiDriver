@@ -69,6 +69,7 @@ class window():
         D = Button(self.window, text="connect to fake wifi server", command=lambda: self.wifi_socket_thread.start())
         E = Button(self.window, text="send fake wifi server command", command=self.send_wifi_message)
         F = Button(self.window, text="send fake bluetooth server command", command=self.send_bluetooth_message)
+        G = Button(self.window, text="close connection", command=self.close_fake_wifi_server)
 
         B = Button(self.window, text="send test", command=self.button_callback)
 
@@ -77,6 +78,7 @@ class window():
         D.pack()
         E.pack()
         F.pack()
+        G.pack()
         self.window.protocol("WM_DELETE_WINDOW", self.quit)
         self.window.mainloop()
 
@@ -117,7 +119,10 @@ class window():
                     print("received [%s] from wifi" % data)
             except socket.timeout:
                 pass
+        self.fake_wifi_socket.close()
         print("stopping")
+    def close_fake_wifi_server(self):
+        self.fake_wifi_socket.close()
 
     def connect_fake_bluetooth_server(self):
         self.fake_bluetooth_socket.connect(("127.0.0.1", 50000))
@@ -131,7 +136,7 @@ class window():
                     print("received [%s] from bluetooth" % data)
             except socket.timeout:
                 pass
-
+        self.fake_bluetooth_socket.close()
         print("stopping")
 
     def send_wifi_message(self):

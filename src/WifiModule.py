@@ -76,6 +76,7 @@ class WifiModule(Process):
                                   "TARGET": self.get_target_id,
                                   "ROBOT": self.get_movement_plan
                                   }
+        self.connection_closed = False
         print("starting wifi module")
 
     # Setup behaviour
@@ -94,30 +95,35 @@ class WifiModule(Process):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.bind((self.HOST, self.PORT))
             s.listen()
-            conn, addr = s.accept()
-            conn.settimeout(2)
-            self.robot_action_list.put(Command(RobotAction.WIFI_CONNECTED, ""))
-            with conn:
-                print(f"Connected by {addr}")
-                print("wifi thread listening for commands")
-                while not self.stopped:
-                    if not self.stopped_queue.empty():
-                        command = self.stopped_queue.get()
-                        if command.command_type == OverrideAction.STOP:
-                            self.stopped = True
-                            break
-                    if not self.main_command_queue.empty():
-                        command = self.main_command_queue.get()
-                        if command.command_type == WifiAction.START_MISSION:
-                            self.send_start_mission_command(conn, command.data)
-                    # Get data from wifi connection
-                    conn.settimeout(2)
-                    data = receive_message_with_size(conn)
-                    if data is not None:
-                        self.parse_wifi_command(data, conn)
-                        print("received [%s]" % data)
+            while not self.stopped:
+                conn, addr = s.accept()
+                conn.settimeout(2)
+                self.robot_action_list.put(Command(RobotAction.WIFI_CONNECTED, ""))
+                self.connection_closed = False
+                with conn:
+                    print(f"Connected by {addr}")
+                    print("wifi thread listening for commands")
+                    while not self.connection_closed:
+                        if not self.stopped_queue.empty():
+                            command = self.stopped_queue.get()
+                            if command.command_type == OverrideAction.STOP:
+                                self.stopped = True
+                                break
+                        if not self.main_command_queue.empty():
+                            command = self.main_command_queue.get()
+                            if command.command_type == WifiAction.START_MISSION:
+                                self.send_start_mission_command(conn, command.data)
+                        # Get data from wifi connection
+                        conn.settimeout(2)
+                        data = self.receive_message_with_size(conn)
+                        if data is not None:
+                            self.parse_wifi_command(data, conn)
+                            print("received [%s]" % data)
 
-                print("stopping!")
+                    print("finishing connection!")
+                    self.robot_action_list.put(Command(RobotAction.WIFI_DISCONNECTED, ""))
+
+            print("stopping!")
 
     def send_start_mission_command(self, conn, data):
         print("trying to send start mission to wifi")
@@ -161,3 +167,23 @@ class WifiModule(Process):
 
     def get_target_id(self, data, command, conn):
         self.robot_action_list.put(Command(RobotAction.SEND_TARGET_ID, data))
+
+    def receive_message_with_size(self, conn):
+        try:
+            data = conn.recv(4)
+            if len(data) == 0:
+                self.connection_closed = True
+                return None
+            else:
+                number_of_bytes = struct.unpack("!I", data)[0]
+                received_packets = b''
+                bytes_to_receive = number_of_bytes
+                while len(received_packets) < number_of_bytes:
+                    packet = conn.recv(bytes_to_receive)
+                    bytes_to_receive -= len(packet)
+                    received_packets += packet
+                return received_packets
+        except socket.timeout:
+            return None
+        except:
+            return None
