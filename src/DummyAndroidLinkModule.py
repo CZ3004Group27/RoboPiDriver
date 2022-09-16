@@ -6,11 +6,13 @@ import socket
 import signal
 import struct
 
+
 def send_message_with_size(conn, data):
     number_of_bytes = len(data)
     packet_length = struct.pack("!I", number_of_bytes)
     packet_length += data
     conn.sendall(packet_length)
+
 
 def android_close_module():
     try:
@@ -141,7 +143,7 @@ class AndroidLinkModule(Process):
                 try:
                     string_to_send = "STATUS/" + str(self.robot_ready_status) + "/" + str(self.wifi_connected_status)
                     client_sock.settimeout(2)
-                    client_sock.sendall(str.encode(string_to_send))
+                    send_message_with_size(client_sock, str.encode(string_to_send))
                     print(string_to_send)
                 except socket.timeout:
                     pass
@@ -164,7 +166,7 @@ class AndroidLinkModule(Process):
     def send_android_message(self, message, conn):
         try:
             conn.settimeout(2)
-            conn.sendall(message)
+            send_message_with_size(conn, message)
         except socket.timeout:
             pass
         except:
@@ -224,10 +226,10 @@ class AndroidLinkModule(Process):
 
     def send_done(self, number_of_movements, conn):
         try:
-            string = "DONE/"+str(number_of_movements)
+            string = "DONE/" + str(number_of_movements)
             message = string.encode("utf-8")
             conn.settimeout(2)
-            conn.sendall(message)
+            send_message_with_size(conn, message)
         except socket.timeout:
             pass
         except:

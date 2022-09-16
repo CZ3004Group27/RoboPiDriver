@@ -112,10 +112,8 @@ class window():
         self.fake_wifi_socket.settimeout(2)
         while not self.stopped:
             try:
-                data = self.fake_wifi_socket.recv(2048)
-                if len(data) == 0:
-                    pass
-                else:
+                data = receive_message_with_size(self.fake_wifi_socket)
+                if data is not None:
                     print("received [%s] from wifi" % data)
             except socket.timeout:
                 pass
@@ -129,10 +127,8 @@ class window():
         self.fake_bluetooth_socket.settimeout(2)
         while not self.stopped:
             try:
-                data = self.fake_bluetooth_socket.recv(2048)
-                if len(data) == 0:
-                    pass
-                else:
+                data = receive_message_with_size(self.fake_bluetooth_socket)
+                if data is not None:
                     print("received [%s] from bluetooth" % data)
             except socket.timeout:
                 pass
