@@ -4,6 +4,7 @@ from Action import *
 import os
 import signal
 import socket
+import struct
 
 # receives map from android tablet and sends image result to tablet and robot position
 
@@ -79,6 +80,33 @@ else:
     def android_close_module():
         pass
 
+
+    def send_message_with_size(conn, data):
+        number_of_bytes = len(data)
+        packet_length = struct.pack("!I", number_of_bytes)
+        packet_length += data
+        conn.sendall(packet_length)
+
+
+    def receive_message_with_size(conn):
+        try:
+            data = conn.recv(4)
+            if len(data) == 0:
+                return None
+            else:
+                number_of_bytes = struct.unpack("!I", data)[0]
+                received_packets = b''
+                bytes_to_receive = number_of_bytes
+                while len(received_packets) < number_of_bytes:
+                    packet = conn.recv(bytes_to_receive)
+                    bytes_to_receive -= len(packet)
+                    received_packets += packet
+                return received_packets
+        except socket.timeout:
+            return None
+        except:
+            return None
+
     class AndroidLinkModule(Process):
         TIMEOUT_PERIOD = 0.5
 
@@ -148,7 +176,6 @@ else:
             print("Waiting for connection on RFCOMM channel %d" % port)
 
             client_sock, client_info = server_sock.accept()
-            client_sock.settimeout(2)
             print("Accepted connection from ", client_info)
             self.bluetooth_connected_status = True
 
@@ -185,19 +212,12 @@ else:
                         self.send_robot_position(client_sock, command.data)
                     elif command.command_type == AndroidBluetoothAction.SEND_IMAGE_WITH_RESULT:
                         self.send_android_message(command.data, client_sock)
-                #
-                try:
-                    data = client_sock.recv(2048)
-                    if len(data) == 0:
-                        pass
-                    else:
-                        # self.parse_android_message(data)
-                        # Send command to main thread
-                        print("received [%s]" % data)
-                except socket.timeout:
-                    pass
-                except:
-                    pass
+                client_sock.settimeout(2)
+                data = receive_message_with_size(client_sock)
+                if data is not None:
+                    self.parse_android_message(data)
+                    # Send command to main thread
+                    print("received [%s]" % data)
 
                 try:
                     string_to_send = "STATUS/" + str(self.robot_ready_status) + "/" + str(self.wifi_connected_status)

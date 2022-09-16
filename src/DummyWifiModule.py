@@ -5,15 +5,10 @@ from Action import *
 from DummyCameraModule import DummyCameraModule
 import signal
 import base64
+import struct
 
 
 # receives movement instructions and image result from PC, sends to it map information
-
-
-def send_image(image, conn):
-    # Send image
-    string_to_send = "PHOTODATA/" + base64.b64encode(image.tobytes()).decode("utf-8")
-    conn.sendall(string_to_send.encode("utf-8"))
 
 
 def wifi_close_module():
@@ -25,6 +20,36 @@ def wifi_close_module():
         sock.close()
     except socket.timeout:
         pass
+
+
+def send_message_with_size(conn, data):
+    number_of_bytes = len(data)
+    packet_length = struct.pack("!I", number_of_bytes)
+    packet_length += data
+    conn.sendall(packet_length)
+def receive_message_with_size(conn):
+    try:
+        data = conn.recv(4)
+        if len(data) == 0:
+            return None
+        else:
+            number_of_bytes = struct.unpack("!I", data)[0]
+            received_packets = b''
+            bytes_to_receive = number_of_bytes
+            while len(received_packets) < number_of_bytes:
+                packet = conn.recv(bytes_to_receive)
+                bytes_to_receive -= len(packet)
+                received_packets += packet
+            return received_packets
+    except socket.timeout:
+        return None
+    except:
+        return None
+
+def send_image(image, conn):
+    # Send image
+    string_to_send = "PHOTODATA/" + base64.b64encode(image.tobytes()).decode("utf-8")
+    send_message_with_size(conn, string_to_send.encode("utf-8"))
 
 
 class WifiModule(Process):
@@ -83,7 +108,6 @@ class WifiModule(Process):
 
         conn, fd = server_sock.accept()
         self.robot_action_list.put(Command(RobotAction.WIFI_CONNECTED, ""))
-        conn.settimeout(2)
         print("Accepted connection from ", fd)
 
         print("wifi loop running")
@@ -101,15 +125,11 @@ class WifiModule(Process):
                 if command.command_type == WifiAction.START_MISSION:
                     self.send_start_mission_command(conn, command.data)
             # Get data from wifi connection
-            try:
-                data = conn.recv(2048)
-                if len(data) == 0:
-                    pass
-                else:
-                    self.parse_wifi_command(data, conn)
-                    print("received [%s]" % data)
-            except socket.timeout:
-                pass
+            conn.settimeout(2)
+            data = receive_message_with_size(conn)
+            if data is not None:
+                self.parse_wifi_command(data, conn)
+                print("received [%s]" % data)
 
         print("stopping!")
         conn.close()
@@ -119,7 +139,7 @@ class WifiModule(Process):
         print("trying to send start mission to wifi")
         try:
             conn.settimeout(2)
-            conn.sendall(data)
+            send_message_with_size(conn, data)
         except:
             pass
 
