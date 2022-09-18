@@ -179,6 +179,13 @@ else:
             while not self.stopped:
                 client_sock, client_info = server_sock.accept()
                 print("Accepted connection from ", client_info)
+
+                # Print out bluetooth name, remove if not working
+                name = bluetooth.lookup_name(client_info)
+                if name:
+                    print("Bluetooth connected device name: " + name)
+                #
+
                 self.bluetooth_connected_status = True
                 self.connection_closed = False
 
