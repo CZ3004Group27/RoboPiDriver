@@ -146,6 +146,7 @@ else:
                 "-90": 1,
                 "90": 3
             }
+            self.connection_closed = False
 
         # Setup behaviour
         # 1. Listen for bluetooth connection
@@ -159,6 +160,9 @@ else:
         # 6. send android robot status
         # 7. repeat loop
         def run(self):
+            """Ignore CTRL+C in the worker process."""
+            signal.signal(signal.SIGINT, signal.SIG_IGN)
+
             server_sock = BluetoothSocket(RFCOMM)
             server_sock.bind(("", PORT_ANY))
             server_sock.listen(1)
@@ -219,9 +223,12 @@ else:
                         elif command.command_type == AndroidBluetoothAction.WIFI_CONNECTED:
                             self.wifi_connected_status = True
                         elif command.command_type == AndroidBluetoothAction.UPDATE_DONE:
-                            self.send_robot_position(client_sock, command.data)
+                            self.send_done(command.data, client_sock)
                         elif command.command_type == AndroidBluetoothAction.SEND_IMAGE_WITH_RESULT:
                             self.send_android_message(command.data, client_sock)
+                        elif command.command_type == AndroidBluetoothAction.SEND_MISSION_PLAN:
+                            self.send_android_message(command.data, client_sock)
+
                     client_sock.settimeout(2)
                     data = receive_message_with_size(client_sock)
                     if data is not None:
@@ -248,6 +255,7 @@ else:
         def parse_android_message(self, data):
             encoding = 'utf-8'
             parsed_string = data.decode(encoding)
+            print(parsed_string)
             command = parsed_string.split("/")
             self.parse_command_type(command, data)
 
@@ -262,6 +270,7 @@ else:
 
         def start_robot(self, command, data):
             # Run command based on explore or fastest path
+            print("starting mission")
             self.pathing_dict[command[1]](command)
 
         def move_robot(self, command, data):
@@ -288,13 +297,16 @@ else:
             self.robot_action_queue.put(Command(RobotAction.SET_ROBOT_POSITION_DIRECTION, robot_position_list))
 
         def start_explore(self, command, data):
+            print("starting explore")
             self.set_robot_position(command)
             self.start_mission(command, data)
 
         def start_path(self, command, data):
+            print("starting path")
             self.start_mission(command, data)
 
         def start_mission(self, command, data):
+            print("starting mission")
             self.robot_action_queue.put(Command(RobotAction.START_MISSION, data))
 
         def update_robot_position(self, command, data):
@@ -308,8 +320,16 @@ else:
             # Set robot location in main thread
             self.robot_action_queue.put(Command(RobotAction.SET_ROBOT_POSITION_DIRECTION, robot_position_list))
 
-        def send_robot_done(self):
-            pass
+        def send_done(self, number_of_movements, conn):
+            try:
+                string = "DONE/" + str(number_of_movements)
+                message = string.encode("utf-8")
+                conn.settimeout(2)
+                send_message_with_size(conn, message)
+            except socket.timeout:
+                pass
+            except:
+                pass
 
         def receive_message_with_size(self, conn):
             try:

@@ -11,6 +11,17 @@ import struct
 # receives movement instructions and image result from PC, sends to it map information
 
 
+def wifi_close_module():
+    try:
+        sock = socket.socket(socket.AF_INET,
+                             socket.SOCK_STREAM)
+        sock.settimeout(2)
+        sock.connect(("127.0.0.1", WifiModule.PORT))
+        sock.close()
+    except socket.timeout:
+        pass
+
+
 def send_message_with_size(conn, data):
     number_of_bytes = len(data)
     packet_length = struct.pack("!I", number_of_bytes)
@@ -22,34 +33,6 @@ def send_image(image, conn):
     # Send image
     string_to_send = "PHOTODATA/" + base64.b64encode(cv2.imencode('.jpg', image)[1].tobytes()).decode("utf-8")
     send_message_with_size(conn, string_to_send.encode("utf-8"))
-
-def receive_message_with_size(conn):
-    try:
-        data = conn.recv(4)
-        if len(data) == 0:
-            return None
-        else:
-            number_of_bytes = struct.unpack("!I", data)[0]
-            received_packets = b''
-            bytes_to_receive = number_of_bytes
-            while len(received_packets) < number_of_bytes:
-                packet = conn.recv(bytes_to_receive)
-                bytes_to_receive -= len(packet)
-                received_packets += packet
-            return received_packets
-    except socket.timeout:
-        return None
-    except:
-        return None
-def wifi_close_module():
-    try:
-        sock = socket.socket(socket.AF_INET,
-                             socket.SOCK_STREAM)
-        sock.settimeout(2)
-        sock.connect(("127.0.0.1", WifiModule.PORT))
-        sock.close()
-    except socket.timeout:
-        pass
 
 
 class WifiModule(Process):
@@ -95,7 +78,9 @@ class WifiModule(Process):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.bind((self.HOST, self.PORT))
             s.listen()
+            port = s.getsockname()[1]
             while not self.stopped:
+                print("Waiting for connection on fake wifi channel %d" % port)
                 conn, addr = s.accept()
                 conn.settimeout(2)
                 self.robot_action_list.put(Command(RobotAction.WIFI_CONNECTED, ""))
@@ -159,7 +144,9 @@ class WifiModule(Process):
         obstacle = command[1].split("-")
         self.robot_action_list.put(Command(RobotAction.SET_OBSTACLE_POSITION, obstacle))
         # Get list of movements and send to main thread
-        self.robot_action_list.put(Command(RobotAction.SET_MOVEMENTS, obstacle))
+        moves = command[2]
+        list_of_moves = moves.split(",")
+        self.robot_action_list.put(Command(RobotAction.SET_MOVEMENTS, list_of_moves))
 
     def parse_wifi_command(self, data, conn):
         raw_string = data.decode("utf-8")
