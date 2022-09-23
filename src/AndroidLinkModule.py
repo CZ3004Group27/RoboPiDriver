@@ -320,9 +320,12 @@ else:
             # Set robot location in main thread
             self.robot_action_queue.put(Command(RobotAction.SET_ROBOT_POSITION_DIRECTION, robot_position_list))
 
-        def send_done(self, number_of_movements, conn):
+        def send_done(self, command, conn):
             try:
-                string = "DONE/" + str(number_of_movements)
+                number_of_movements = command[0]
+                obstacle_x = command[1]
+                obstacle_y = command[2]
+                string = "DONE/" + str(number_of_movements) + "/" + str(obstacle_x) + "-" + str(obstacle_y)
                 message = string.encode("utf-8")
                 conn.settimeout(2)
                 send_message_with_size(conn, message)

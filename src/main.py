@@ -81,7 +81,7 @@ if __name__ == '__main__':
                         movement_counter += 1
 
                     temp_list = [robot_position_x, robot_position_y, robot_direction]
-                    android_command_queue.put(Command(AndroidBluetoothAction.UPDATE_DONE, movement_counter))
+                    android_command_queue.put(Command(AndroidBluetoothAction.UPDATE_DONE, [movement_counter,obstacle_position_x,obstacle_position_y]))
 
                 elif command.command_type == RobotAction.SET_ROBOT_POSITION_DIRECTION:
                     temp_tuple = command.data
