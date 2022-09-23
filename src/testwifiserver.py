@@ -1,4 +1,6 @@
 from CameraModule import CameraModule
+# from DummyCameraModule import DummyCameraModule as CameraModule
+from WifiTester import receive_message_with_size
 import socket
 import cv2
 import base64
@@ -18,7 +20,7 @@ class Server:
                 print(f"Connected by {addr}")
                 print("wifi thread listening for commands")
                 # Get data from wifi connection
-                data = conn.recv(2048)
+                data = receive_message_with_size(conn)
                 if len(data) == 0:
                     pass
                 else:

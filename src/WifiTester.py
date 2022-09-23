@@ -154,4 +154,5 @@ class window():
             self.bluetooth_socket_thread.join()
         self.window.destroy()
 
-e = window()
+if __name__ == "__main__":
+    e = window()
