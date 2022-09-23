@@ -6,6 +6,7 @@ from CameraModule import CameraModule
 import signal
 import base64
 import struct
+import cv2
 
 
 # receives movement instructions and image result from PC, sends to it map information
