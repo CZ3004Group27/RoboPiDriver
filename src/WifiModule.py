@@ -39,7 +39,7 @@ def send_image(image, conn):
 class WifiModule(Process):
     HOST = ''  # Standard loopback interface address (localhost)
     PORT = 25565  # Port to listen on (non-privileged ports are > 1023)
-
+    TIMEOUT_PERIOD = 0.5
     def __init__(self, stopped_queue, main_command_queue, robot_action_list, main_thread_override_queue):
         Process.__init__(self)
         self.stopped = False
