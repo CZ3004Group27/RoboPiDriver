@@ -78,8 +78,8 @@ class STMModule:
                 if self.check_for_obstacle():
                     raise RobotMovementError
                 moved = True
-                self.forward()
                 print("moving forward!")
+                self.forward()
                 new_y = new_y + (1 - robot_direction) * (int(not (robot_direction % 2)))
                 new_x = new_x + (2 - robot_direction) * (int((robot_direction % 2)))
             elif move == RobotAction.BACKWARD:
@@ -87,14 +87,15 @@ class STMModule:
                     raise RobotMovementError
                 moved = True
                 print("moving backward!")
+                self.backward()
                 new_y = new_y - (1 - robot_direction) * (int(not (robot_direction % 2)))
                 new_x = new_x - (2 - robot_direction) * (int((robot_direction % 2)))
             elif move == RobotAction.TURN_FORWARD_LEFT:
                 if self.check_for_obstacle():
                     raise RobotMovementError
                 moved = True
-                self.forwardleft()
                 print("moving forward left!!")
+                self.forwardleft()
                 if robot_direction == 0 or robot_direction == 1:
                     new_y = new_y + 3
                 else:
@@ -109,8 +110,8 @@ class STMModule:
                 if self.check_for_obstacle():
                     raise RobotMovementError
                 moved = True
-                self.forwardright()
                 print("moving forward right!")
+                self.forwardright()
                 if robot_direction == 0 or robot_direction == 3:
                     new_y = new_y + 3
                 else:
@@ -125,8 +126,8 @@ class STMModule:
                 if self.check_for_obstacle():
                     raise RobotMovementError
                 moved = True
-                self.backwardleft()
                 print("moving backward left!")
+                self.backwardleft()
                 if robot_direction == 1 or robot_direction == 2:
                     new_y = new_y + 3
                 else:
@@ -141,8 +142,8 @@ class STMModule:
                 if self.check_for_obstacle():
                     raise RobotMovementError
                 moved = True
-                self.backwardright()
                 print("moving backward right!")
+                self.backwardright()
                 if robot_direction == 1 or robot_direction == 2:
                     new_y = new_y + 3
                 else:

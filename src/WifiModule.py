@@ -39,7 +39,7 @@ def send_image(image, conn):
 class WifiModule(Process):
     HOST = ''  # Standard loopback interface address (localhost)
     PORT = 25565  # Port to listen on (non-privileged ports are > 1023)
-
+    TIMEOUT_PERIOD = 0.5
     def __init__(self, stopped_queue, main_command_queue, robot_action_list, main_thread_override_queue):
         Process.__init__(self)
         self.stopped = False
@@ -114,7 +114,7 @@ class WifiModule(Process):
     def send_start_mission_command(self, conn, data):
         print("trying to send start mission to wifi")
         try:
-            conn.settimeout(2)
+            conn.settimeout(self.TIMEOUT_PERIOD)
             send_message_with_size(conn, data)
         except:
             pass
@@ -173,6 +173,11 @@ class WifiModule(Process):
                     received_packets += packet
                 return received_packets
         except socket.timeout:
+            self.connection_closed = True
+            return None
+        except socket.error:
+            self.connection_closed = True
             return None
         except:
+            self.connection_closed = True
             return None

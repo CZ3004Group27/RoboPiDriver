@@ -2,9 +2,9 @@ from multiprocessing import Process, Lock, Queue
 from Action import *
 import socket
 
-# from WifiModule import WifiModule
+# from WifiModule import *
 # from STMModule import STMModule
-# from AndroidLinkModule import AndroidLinkModule
+# from AndroidLinkModule import *
 
 from DummyAndroidLinkModule import *
 from DummyWifiModule import *

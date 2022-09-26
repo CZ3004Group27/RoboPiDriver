@@ -90,69 +90,77 @@ class AndroidLinkModule(Process):
 
         while not self.stopped:
             print("Waiting for connection on fake wifi RFCOMM channel %d" % port)
+            server_sock.timeout(2)
+            try:
+                client_sock, client_info = server_sock.accept()
 
-            client_sock, client_info = server_sock.accept()
+                print("Accepted connection from ", client_info)
+                self.bluetooth_connected_status = True
+                self.connection_closed = False
 
-            print("Accepted connection from ", client_info)
-            self.bluetooth_connected_status = True
-            self.connection_closed = False
+                print("bluetooth loop running")
+                while not self.connection_closed:
+                    # 1. check for stopped
+                    if not self.stopped_queue.empty():
+                        command = self.stopped_queue.get()
+                        if command.command_type == OverrideAction.STOP:
+                            self.stopped = True
+                            break
 
-            print("bluetooth loop running")
-            while not self.connection_closed:
-                # 1. check for stopped
+                    # 4. run all possible commands from command thread or until timeout
+                    self.timeout_start = time.time()
+                    if not self.main_command_queue.empty():
+                        self.timeout = time.time() - self.timeout_start
+
+                        # Get out of loop if time has surpassed TIMEOUT_PERIOD
+                        if self.timeout > self.TIMEOUT_PERIOD:
+                            break
+
+                        command = self.main_command_queue.get()
+
+                        # COMMAND SWITCH BLOCK
+                        if command.command_type == AndroidBluetoothAction.ROBOT_NOT_READY:
+                            self.robot_ready_status = False
+                        elif command.command_type == AndroidBluetoothAction.ROBOT_READY:
+                            self.robot_ready_status = True
+                        elif command.command_type == AndroidBluetoothAction.WIFI_DISCONNECTED:
+                            self.wifi_connected_status = False
+                        elif command.command_type == AndroidBluetoothAction.WIFI_CONNECTED:
+                            self.wifi_connected_status = True
+                        elif command.command_type == AndroidBluetoothAction.UPDATE_DONE:
+                            self.send_done(command.data, client_sock)
+                        elif command.command_type == AndroidBluetoothAction.SEND_IMAGE_WITH_RESULT:
+                            self.send_android_message(command.data, client_sock)
+                        elif command.command_type == AndroidBluetoothAction.SEND_MISSION_PLAN:
+                            self.send_android_message(command.data, client_sock)
+
+                    client_sock.settimeout(self.TIMEOUT_PERIOD)
+                    data = self.receive_message_with_size(client_sock)
+                    if data is not None:
+                        self.parse_android_message(data)
+                        # Send command to main thread
+                        print("received [%s]" % data)
+
+                    try:
+                        string_to_send = "STATUS/" + str(self.robot_ready_status) + "/" + str(self.wifi_connected_status)
+                        client_sock.settimeout(2)
+                        send_message_with_size(client_sock, str.encode(string_to_send))
+                        print(string_to_send)
+                    except socket.timeout:
+                        pass
+                    except:
+                        pass
+
+                print("finishing connection!")
+                client_sock.close()
+                self.bluetooth_connected_status = False
+            except socket.timeout:
                 if not self.stopped_queue.empty():
                     command = self.stopped_queue.get()
                     if command.command_type == OverrideAction.STOP:
                         self.stopped = True
                         break
 
-                # 4. run all possible commands from command thread or until timeout
-                self.timeout_start = time.time()
-                if not self.main_command_queue.empty():
-                    self.timeout = time.time() - self.timeout_start
-
-                    # Get out of loop if time has surpassed TIMEOUT_PERIOD
-                    if self.timeout > self.TIMEOUT_PERIOD:
-                        break
-
-                    command = self.main_command_queue.get()
-
-                    # COMMAND SWITCH BLOCK
-                    if command.command_type == AndroidBluetoothAction.ROBOT_NOT_READY:
-                        self.robot_ready_status = False
-                    elif command.command_type == AndroidBluetoothAction.ROBOT_READY:
-                        self.robot_ready_status = True
-                    elif command.command_type == AndroidBluetoothAction.WIFI_DISCONNECTED:
-                        self.wifi_connected_status = False
-                    elif command.command_type == AndroidBluetoothAction.WIFI_CONNECTED:
-                        self.wifi_connected_status = True
-                    elif command.command_type == AndroidBluetoothAction.UPDATE_DONE:
-                        self.send_done(command.data, client_sock)
-                    elif command.command_type == AndroidBluetoothAction.SEND_IMAGE_WITH_RESULT:
-                        self.send_android_message(command.data, client_sock)
-                    elif command.command_type == AndroidBluetoothAction.SEND_MISSION_PLAN:
-                        self.send_android_message(command.data, client_sock)
-
-                client_sock.settimeout(2)
-                data = self.receive_message_with_size(client_sock)
-                if data is not None:
-                    self.parse_android_message(data)
-                    # Send command to main thread
-                    print("received [%s]" % data)
-
-                try:
-                    string_to_send = "STATUS/" + str(self.robot_ready_status) + "/" + str(self.wifi_connected_status)
-                    client_sock.settimeout(2)
-                    send_message_with_size(client_sock, str.encode(string_to_send))
-                    print(string_to_send)
-                except socket.timeout:
-                    pass
-                except:
-                    pass
-
-            print("finishing connection!")
-            client_sock.close()
-            self.bluetooth_connected_status = False
         print("stopping!")
         server_sock.close()
 
@@ -165,7 +173,7 @@ class AndroidLinkModule(Process):
 
     def send_android_message(self, message, conn):
         try:
-            conn.settimeout(2)
+            conn.settimeout(self.TIMEOUT_PERIOD)
             send_message_with_size(conn, message)
         except socket.timeout:
             pass
@@ -254,6 +262,11 @@ class AndroidLinkModule(Process):
                     received_packets += packet
                 return received_packets
         except socket.timeout:
+            self.connection_closed = True
+            return None
+        except socket.error:
+            self.connection_closed = True
             return None
         except:
+            self.connection_closed = True
             return None
