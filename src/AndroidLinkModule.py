@@ -220,7 +220,7 @@ else:
 
                         try:
                             string_to_send = "STATUS/" + str(self.robot_ready_status) + "/" + str(self.wifi_connected_status)
-                            print(string_to_send)
+                            # print(string_to_send)
                             client_sock.settimeout(2)
                             send_message_with_size(str.encode(string_to_send))
                         except btcommon.BluetoothError:
@@ -259,7 +259,7 @@ else:
         def start_robot(self, command, data):
             # Run command based on explore or fastest path
             print("starting mission")
-            self.pathing_dict[command[1]](command)
+            self.pathing_dict[command[1]](command, data)
 
         def move_robot(self, command, data):
             movement_value = self.robot_move_dict[command[1]]
@@ -339,17 +339,6 @@ else:
                         received_packets += packet
                     return received_packets
             except btcommon.BluetoothError:
-                print("bluetooth error detected")
-                return None
-            except socket.timeout:
-                print("bluetooth error detected")
-                self.connection_closed = True
-                return None
-            except socket.error:
-                print("bluetooth error detected")
-                self.connection_closed = True
                 return None
             except:
-                print("bluetooth error detected")
-                self.connection_closed = True
                 return None
