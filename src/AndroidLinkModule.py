@@ -161,7 +161,7 @@ else:
             print("Waiting for connection on RFCOMM channel %d" % port)
 
             while not self.stopped:
-                server_sock.timeout(2)
+                server_sock.settimeout(2)
                 try:
                     client_sock, client_info = server_sock.accept()
                     print("Accepted connection from ", client_info)

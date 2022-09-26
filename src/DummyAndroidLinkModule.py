@@ -90,7 +90,7 @@ class AndroidLinkModule(Process):
 
         while not self.stopped:
             print("Waiting for connection on fake wifi RFCOMM channel %d" % port)
-            server_sock.timeout(2)
+            server_sock.settimeout(2)
             try:
                 client_sock, client_info = server_sock.accept()
 
