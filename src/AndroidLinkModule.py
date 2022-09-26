@@ -167,7 +167,7 @@ else:
                     print("Accepted connection from ", client_info)
 
                     # Print out bluetooth name, remove if not working
-                    name = lookup_name(client_info)
+                    name = lookup_name(client_info[0])
                     if name:
                         print("Bluetooth connected device name: " + name)
                     #
@@ -326,6 +326,7 @@ else:
             try:
                 data = conn.recv(4)
                 if len(data) == 0:
+                    print("manual disconnect detected")
                     self.connection_closed = True
                     return None
                 else:
@@ -338,13 +339,17 @@ else:
                         received_packets += packet
                     return received_packets
             except btcommon.BluetoothError:
+                print("bluetooth error detected")
                 return None
             except socket.timeout:
+                print("bluetooth error detected")
                 self.connection_closed = True
                 return None
             except socket.error:
+                print("bluetooth error detected")
                 self.connection_closed = True
                 return None
             except:
+                print("bluetooth error detected")
                 self.connection_closed = True
                 return None
