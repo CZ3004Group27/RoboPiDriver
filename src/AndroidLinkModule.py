@@ -223,7 +223,7 @@ else:
                             print(string_to_send)
                             client_sock.settimeout(2)
                             send_message_with_size(str.encode(string_to_send))
-                        except socket.timeout:
+                        except bluetooth.btcommon.BluetoothError:
                             pass
                         except:
                             pass
@@ -231,7 +231,7 @@ else:
                     print("finished connection!")
                     client_sock.close()
                     self.bluetooth_connected_status = False
-                except socket.timeout:
+                except bluetooth.btcommon.BluetoothError:
                     if not self.stopped_queue.empty():
                         command = self.stopped_queue.get()
                         if command.command_type == OverrideAction.STOP:
@@ -337,6 +337,9 @@ else:
                         bytes_to_receive -= len(packet)
                         received_packets += packet
                     return received_packets
+            except bluetooth.btcommon.BluetoothError:
+                self.connection_closed = True
+                return None
             except socket.timeout:
                 self.connection_closed = True
                 return None
