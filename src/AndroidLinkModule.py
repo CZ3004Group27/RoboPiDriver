@@ -167,7 +167,7 @@ else:
                     print("Accepted connection from ", client_info)
 
                     # Print out bluetooth name, remove if not working
-                    name = bluetooth.lookup_name(client_info)
+                    name = lookup_name(client_info)
                     if name:
                         print("Bluetooth connected device name: " + name)
                     #
