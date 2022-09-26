@@ -2,6 +2,7 @@ from multiprocessing import Process, Queue
 from Action import *
 import os
 from RobotMovementError import *
+import time
 
 
 import serial
@@ -15,7 +16,8 @@ class STMModule:
         # ser = serial.Serial('/dev/ttyUSB1', 115200, timeout=3)  # Check that arduino has same baudrate of 115200
         # ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=3)  # Check that arduino has same baudrate of 115200
         self.isEstablished = False
-        ser.flush()
+        self.serialConn = None
+        #self.serialConn.flush()
         pass
 
     def isConnected(self):
@@ -28,13 +30,13 @@ class STMModule:
                 # Let's wait for connection
                 print('[STM_INFO] Waiting for serial connection from STM')
 
-                self.serialConn = serial.Serial(self.commPort, self.baud, timeout=0.1)
+                self.serialConn = serial.Serial('/dev/ttyUSB0', self.baud, timeout=0.1)
                 print('[STM_ACCEPTED] Connected to STM.')
                 self.isEstablished = True
                 retry = False
 
             except Exception as e:
-                print('[STM_ERROR] Arduino Connection Error: %s' % str(e))
+                print('[STM_ERROR] STM Connection Error: %s' % str(e))
                 retry = True
 
             # When established, break the while(true)
@@ -48,23 +50,23 @@ class STMModule:
 
 
     def forward(self):
-        ser.write(str.encode("FW"))
+        self.serialConn.write(str.encode("FW"))
 
 
     def forwardLeft(self):
-        ser.write(str.encode("FL"))
+        self.serialConn.write(str.encode("FL"))
 
 
     def forwardRight(self):
-        ser.write(str.encode("FR"))
+        self.serialConn.write(str.encode("FR"))
 
 
     def backwardleft(self):
-        ser.write(str.encode("BL"))
+        self.serialConn.write(str.encode("BL"))
 
 
     def backwardright(self):
-        ser.write(str.encode("BR"))
+        self.serialConn.write(str.encode("BR"))
 
 
     # returns new robot position x and y and direction r
