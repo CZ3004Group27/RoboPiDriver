@@ -10,23 +10,52 @@ import serial
 class STMModule:
     def __init__(self):
         # global ser
-        # try:
-           ser = serial.Serial('/dev/ttyUSB1', 115200, timeout=3)  # Check that arduino has same baudrate of 115200
-        # except:
-            ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=3)  # Check that arduino has same baudrate of 115200
-
-         ser.flush()
+        self.port = '/dev/ttyS0'
+        self.baud = 115200
+        # ser = serial.Serial('/dev/ttyUSB1', 115200, timeout=3)  # Check that arduino has same baudrate of 115200
+        # ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=3)  # Check that arduino has same baudrate of 115200
+        self.isEstablished = False
+        ser.flush()
         pass
+
+    def isConnected(self):
+        return self.isEstablished
+
+    def connect(self):
+        while True:
+            retry = False
+            try:
+                # Let's wait for connection
+                print('[STM_INFO] Waiting for serial connection from STM')
+
+                self.serialConn = serial.Serial(self.commPort, self.baud, timeout=0.1)
+                print('[STM_ACCEPTED] Connected to STM.')
+                self.isEstablished = True
+                retry = False
+
+            except Exception as e:
+                print('[STM_ERROR] Arduino Connection Error: %s' % str(e))
+                retry = True
+
+            # When established, break the while(true)
+            if not retry:
+                break
+
+            # When not yet established, keep retrying
+            print('[STM_INFO] Retrying STM Establishment')
+            time.sleep(1)
+
+
 
     def forward(self):
         ser.write(str.encode("FW"))
 
 
-    def forwardleft(self):
+    def forwardLeft(self):
         ser.write(str.encode("FL"))
 
 
-    def forwardright(self):
+    def forwardRight(self):
         ser.write(str.encode("FR"))
 
 
@@ -38,7 +67,7 @@ class STMModule:
         ser.write(str.encode("BR"))
 
 
-        # returns new robot position x and y and direction r
+    # returns new robot position x and y and direction r
     def process_move(self, move: RobotAction, robot_position_x, robot_position_y, robot_direction):
         moved = False
         new_x = robot_position_x
@@ -131,3 +160,43 @@ class STMModule:
 
     def check_for_obstacle(self):
         return False
+
+    def disconnect(self):
+        if not (self.serialConn is None):  # if (self.serialConn):
+            print('[STM_CLOSE] Shutting down STM Connection')
+            self.serialConn.close()
+            self.isEstablished = False
+
+    def read(self):
+        try:
+            readData = self.serialConn.readline()
+            self.serialConn.flush()  # Clean the pipe
+            readData = readData.decode('utf-8')
+            if readData == '':
+                return None
+            print('[STM_INFO] Received: ' + readData)
+            return readData
+
+        except Exception as e:
+            print('[STM_ERROR] Receiving Error: %s' % str(e))
+            if ('Input/output error' in str(e)):
+                self.disconnect()
+                print('[STM_INFO] Re-establishing Arduino Connection.')
+                self.connect()
+
+    # The fundamental trying to send
+    def write(self, message):
+        try:
+            # Make sure there is a connection first before sending
+            if self.isEstablished:
+                print("STM", message)
+                message = message.encode('utf-8')
+                self.serialConn.write(message)
+                return
+
+            # There is no connections. Send what?
+            else:
+                print('[STM_INVALID] No STM Connections')
+
+        except Exception as e:
+            print('[STM_ERROR] Cannot send message: %s' % str(e))
