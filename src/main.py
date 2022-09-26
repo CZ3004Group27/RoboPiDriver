@@ -5,10 +5,33 @@ import socket
 # from WifiModule import *
 # from STMModule import STMModule
 # from AndroidLinkModule import *
+# from CameraModule import *
 
 from DummyAndroidLinkModule import *
 from DummyWifiModule import *
 from DummySTMModule import *
+from DummyCameraModule import DummyCameraModule as CameraModule
+
+
+# TODO anh help pls
+def run_pathing(stm):
+    camera = CameraModule()
+    path_robot_position_x = 0
+    path_robot_position_y = 0
+    path_robot_direction = 0
+    # STEP 1: move robot forward until detect obstacle
+    x, y, r, moved = stm.process_move(RobotAction.FORWARD_UNTIL_OBS, robot_position_x, robot_position_y,
+                                      robot_direction)
+    path_robot_position_x = x
+    path_robot_position_y = y
+    path_robot_direction = r
+    # STEP 2: Detect picture
+    # STEP 3: Turn left or right around obstacle depending on picture
+    # STEP 4: move robot forward until detect obstacle
+    # STEP 5: Detect picture
+    # STEP 6: turn left or right around obstacle depending on picture
+    pass
+
 
 if __name__ == '__main__':
     # Initialise Variables
@@ -81,7 +104,8 @@ if __name__ == '__main__':
                         movement_counter += 1
 
                     temp_list = [robot_position_x, robot_position_y, robot_direction]
-                    android_command_queue.put(Command(AndroidBluetoothAction.UPDATE_DONE, [movement_counter,obstacle_position_x,obstacle_position_y]))
+                    android_command_queue.put(Command(AndroidBluetoothAction.UPDATE_DONE,
+                                                      [movement_counter, obstacle_position_x, obstacle_position_y]))
 
                 elif command.command_type == RobotAction.SET_ROBOT_POSITION_DIRECTION:
                     temp_tuple = command.data
@@ -97,9 +121,12 @@ if __name__ == '__main__':
                         action_list.put(Command(movement_string_conv_dict[move], ""))
                 elif command.command_type == RobotAction.SEND_TARGET_ID:
                     android_command_queue.put(Command(AndroidBluetoothAction.SEND_IMAGE_WITH_RESULT, command.data))
-                elif command.command_type == RobotAction.START_MISSION:
+                elif command.command_type == RobotAction.START_EXPLORE:
                     movement_counter = 0
                     wifi_command_queue.put(Command(WifiAction.START_MISSION, command.data))
+                elif command.command_type == RobotAction.START_PATH:
+                    movement_counter = 0
+                    run_pathing(stm)
                 elif command.command_type == RobotAction.SEND_MISSION_PLAN:
                     android_command_queue.put(Command(AndroidBluetoothAction.SEND_MISSION_PLAN, command.data))
                 elif command.command_type == RobotAction.WIFI_CONNECTED:

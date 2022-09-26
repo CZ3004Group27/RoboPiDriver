@@ -209,13 +209,16 @@ class AndroidLinkModule(Process):
         self.robot_action_queue.put(Command(RobotAction.SET_ROBOT_POSITION_DIRECTION, robot_position_list))
 
     def start_explore(self, command, data):
-        print("starting explore")
+        print("starting mission")
         self.set_robot_position(command, data)
-        self.start_mission(command, data)
+        print("starting explore")
+        self.robot_action_queue.put(Command(RobotAction.START_EXPLORE, data))
 
     def start_path(self, command, data):
-        print("starting path")
+        print("starting mission")
         self.start_mission(command, data)
+        print("starting path")
+        self.robot_action_queue.put(Command(RobotAction.START_PATH, data))
 
     def start_mission(self, command, data):
         print("starting mission")

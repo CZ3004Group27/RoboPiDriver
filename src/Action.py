@@ -16,10 +16,12 @@ class RobotAction(IntEnum):
     SET_OBSTACLE_POSITION = 8
     SET_MOVEMENTS = 9
     SEND_TARGET_ID = 10
-    START_MISSION = 11
-    SEND_MISSION_PLAN = 12 # (list of moves, original string command)
-    WIFI_DISCONNECTED = 13
-    WIFI_CONNECTED = 14
+    FORWARD_UNTIL_OBS = 11
+    START_EXPLORE = 12
+    START_PATH = 13
+    SEND_MISSION_PLAN = 14 # (list of moves, original string command)
+    WIFI_DISCONNECTED = 15
+    WIFI_CONNECTED = 16
 
 
 class OverrideAction(IntEnum):
