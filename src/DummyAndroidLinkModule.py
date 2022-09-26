@@ -262,7 +262,6 @@ class AndroidLinkModule(Process):
                     received_packets += packet
                 return received_packets
         except socket.timeout:
-            self.connection_closed = True
             return None
         except socket.error:
             self.connection_closed = True

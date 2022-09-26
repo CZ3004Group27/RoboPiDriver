@@ -338,7 +338,6 @@ else:
                         received_packets += packet
                     return received_packets
             except btcommon.BluetoothError:
-                self.connection_closed = True
                 return None
             except socket.timeout:
                 self.connection_closed = True
