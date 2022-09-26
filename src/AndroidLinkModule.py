@@ -286,7 +286,7 @@ else:
 
         def start_explore(self, command, data):
             print("starting explore")
-            self.set_robot_position(command)
+            self.set_robot_position(command, data)
             self.start_mission(command, data)
 
         def start_path(self, command, data):
