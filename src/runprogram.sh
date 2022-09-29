@@ -1,3 +1,3 @@
 #!/bin/bash
 sudo hciconfig hci0 piscan
-python ./main.py
+libcamerify python3 ./main.py
