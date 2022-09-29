@@ -144,7 +144,7 @@ else:
             signal.signal(signal.SIGINT, signal.SIG_IGN)
 
             server_sock = BluetoothSocket(L2CAP)
-            server_sock.bind(("", PORT_ANY))
+            server_sock.bind(("b8:27:eb:d3:81:aa", 1))
             server_sock.listen(1)
 
             port = server_sock.getsockname()[1]
