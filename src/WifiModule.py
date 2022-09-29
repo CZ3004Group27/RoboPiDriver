@@ -81,7 +81,7 @@ class WifiModule(Process):
             s.listen()
             port = s.getsockname()[1]
             while not self.stopped:
-                print("Waiting for connection on fake wifi channel %d" % port)
+                print("Waiting for connection on wifi channel %d" % port)
                 conn, addr = s.accept()
                 conn.settimeout(2)
                 self.robot_action_list.put(Command(RobotAction.WIFI_CONNECTED, ""))
