@@ -186,7 +186,7 @@ else:
 
                         # 4. run all possible commands from command thread or until timeout
                         self.timeout_start = time.time()
-                        if not self.main_command_queue.empty():
+                        while not self.main_command_queue.empty():
                             self.timeout = time.time() - self.timeout_start
 
                             # Get out of loop if time has surpassed TIMEOUT_PERIOD

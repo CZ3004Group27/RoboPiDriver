@@ -40,6 +40,7 @@ class WifiModule(Process):
     HOST = ''  # Standard loopback interface address (localhost)
     PORT = 25565  # Port to listen on (non-privileged ports are > 1023)
     TIMEOUT_PERIOD = 0.5
+
     def __init__(self, stopped_queue, main_command_queue, robot_action_list, main_thread_override_queue):
         Process.__init__(self)
         self.stopped = False
@@ -99,6 +100,8 @@ class WifiModule(Process):
                             command = self.main_command_queue.get()
                             if command.command_type == WifiAction.START_MISSION:
                                 self.send_start_mission_command(conn, command.data)
+                            elif command.command_type == WifiAction.UPDATE_DONE:
+                                self.send_done(command.data, conn)
                         # Get data from wifi connection
                         conn.settimeout(2)
                         data = self.receive_message_with_size(conn)
@@ -116,8 +119,14 @@ class WifiModule(Process):
         try:
             conn.settimeout(self.TIMEOUT_PERIOD)
             send_message_with_size(conn, data)
-        except:
+        except socket.timeout:
             pass
+        except socket.error:
+            self.connection_closed = True
+            return None
+        except:
+            self.connection_closed = True
+            return None
 
     def receive_photo_result_data(self, conn):
         pass
@@ -174,6 +183,24 @@ class WifiModule(Process):
                 return received_packets
         except socket.timeout:
             return None
+        except socket.error:
+            self.connection_closed = True
+            return None
+        except:
+            self.connection_closed = True
+            return None
+
+    def send_done(self, command, conn):
+        try:
+            number_of_movements = command[0]
+            obstacle_x = command[1]
+            obstacle_y = command[2]
+            string = "DONE/" + str(number_of_movements) + "/" + str(obstacle_x) + "-" + str(obstacle_y)
+            message = string.encode("utf-8")
+            conn.settimeout(2)
+            send_message_with_size(conn, message)
+        except socket.timeout:
+            pass
         except socket.error:
             self.connection_closed = True
             return None

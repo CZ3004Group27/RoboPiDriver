@@ -42,6 +42,7 @@ class AndroidBluetoothAction(IntEnum):
 
 class WifiAction(IntEnum):
     START_MISSION = 1
+    UPDATE_DONE = 2
 
 
 class Command:
