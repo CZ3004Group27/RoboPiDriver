@@ -8,7 +8,7 @@ class CameraModule:
             self.initialised = False
             self.camera = Picamera2()
 
-            config = picam2.still_configuration(main={"size": (640, 480)}, "format": "BGR888"})
+            config = Picamera2.still_configuration(main={"size": (640, 480), "format": "BGR888"})
 
             self.camera.configure(config)
             self.camera.video_configuration.controls.framerate = 30
