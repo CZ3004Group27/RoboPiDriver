@@ -143,8 +143,8 @@ else:
             """Ignore CTRL+C in the worker process."""
             signal.signal(signal.SIGINT, signal.SIG_IGN)
 
-            server_sock = BluetoothSocket(L2CAP)
-            server_sock.bind(("b8:27:eb:d3:81:aa", 1))
+            server_sock = BluetoothSocket(RFCOMM)
+            server_sock.bind(("B8:27:EB:2C:7E:55", 1))
             server_sock.listen(1)
 
             port = server_sock.getsockname()[1]
