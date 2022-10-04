@@ -22,6 +22,7 @@ class RobotAction(IntEnum):
     SEND_MISSION_PLAN = 14 # (list of moves, original string command)
     WIFI_DISCONNECTED = 15
     WIFI_CONNECTED = 16
+    SEND_FINISH = 17
 
 
 class OverrideAction(IntEnum):
@@ -38,6 +39,7 @@ class AndroidBluetoothAction(IntEnum):
     UPDATE_DONE = 6
     SEND_IMAGE_WITH_RESULT = 7
     SEND_MISSION_PLAN = 8
+    SEND_FINISH = 9
 
 
 class WifiAction(IntEnum):

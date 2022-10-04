@@ -133,6 +133,8 @@ class AndroidLinkModule(Process):
                             self.send_android_message(command.data, client_sock)
                         elif command.command_type == AndroidBluetoothAction.SEND_MISSION_PLAN:
                             self.send_android_message(command.data, client_sock)
+                        elif command.command_type == AndroidBluetoothAction.SEND_FINISH:
+                            self.send_android_message(command.data, client_sock)
 
                     client_sock.settimeout(self.TIMEOUT_PERIOD)
                     data = self.receive_message_with_size(client_sock)

@@ -133,6 +133,8 @@ if __name__ == '__main__':
                     android_command_queue.put(Command(AndroidBluetoothAction.SEND_MISSION_PLAN, command.data))
                 elif command.command_type == RobotAction.WIFI_CONNECTED:
                     android_command_queue.put(Command(AndroidBluetoothAction.WIFI_CONNECTED, ""))
+                elif command.command_type == RobotAction.SEND_FINISH:
+                    android_command_queue.put(Command(AndroidBluetoothAction.SEND_FINISH, command.data))
                 else:
                     pass
     except KeyboardInterrupt:

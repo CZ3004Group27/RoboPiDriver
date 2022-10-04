@@ -59,7 +59,8 @@ class WifiModule(Process):
         self.wifi_command_dict = {"PHOTO": self.take_photo,
                                   "MOVEMENTS": self.get_movement,
                                   "TARGET": self.get_target_id,
-                                  "ROBOT": self.get_movement_plan
+                                  "ROBOT": self.get_movement_plan,
+                                  "FINISH": self.send_finish
                                   }
         self.direction_conv_dict = {
             "0": 0,
@@ -150,6 +151,8 @@ class WifiModule(Process):
         moves = command[2]
         list_of_moves = moves.split(",")
         self.robot_action_list.put(Command(RobotAction.SET_MOVEMENTS, list_of_moves))
+    def send_finish(self, data, command, conn):
+        self.robot_action_list.put(Command(RobotAction.SEND_FINISH, data))
 
     def parse_wifi_command(self, data, conn):
         raw_string = data.decode("utf-8")
