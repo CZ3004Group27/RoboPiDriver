@@ -27,6 +27,7 @@ else:
             # allow the camera to warmup
             time.sleep(0.1)
             if self.camera:
+                self.camera.release()
                 self.initialised = True
             else:
                 print("CameraModule Error: Can't connect to camera")
@@ -34,6 +35,7 @@ else:
 
         def take_picture(self):
             self.camera.open(self.camera_index)
+            time.sleep(0.1)
             # grab an image from the camera
             ret, frame = self.camera.read()
             self.camera.release()

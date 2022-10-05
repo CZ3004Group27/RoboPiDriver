@@ -109,7 +109,6 @@ if __name__ == '__main__':
                                                       [1, obstacle_position_x, obstacle_position_y]))
                     wifi_command_queue.put(Command(WifiAction.UPDATE_DONE,
                                                       [1, obstacle_position_x, obstacle_position_y]))
-                    sleep(1)
 
                 elif command.command_type == RobotAction.SET_ROBOT_POSITION_DIRECTION:
                     temp_tuple = command.data
