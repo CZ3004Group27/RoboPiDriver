@@ -107,8 +107,8 @@ class WifiModule(Process):
                         conn.settimeout(2)
                         data = self.receive_message_with_size(conn)
                         if data is not None:
-                            self.parse_wifi_command(data, conn)
                             print("received [%s]" % data)
+                            self.parse_wifi_command(data, conn)
 
                     print("finishing connection!")
                     self.robot_action_list.put(Command(RobotAction.WIFI_DISCONNECTED, ""))
@@ -133,8 +133,10 @@ class WifiModule(Process):
         pass
 
     def take_photo(self, data, command, conn):
+        print("taking picture!")
         photo = self.camera.take_picture()
         # SEND PICTURE
+        print("sending photo!")
         send_image(photo, conn)
 
     def todo_receive_mission_instructions(self, data):

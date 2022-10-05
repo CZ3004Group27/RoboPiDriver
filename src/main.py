@@ -106,9 +106,10 @@ if __name__ == '__main__':
 
                     temp_list = [robot_position_x, robot_position_y, robot_direction]
                     android_command_queue.put(Command(AndroidBluetoothAction.UPDATE_DONE,
-                                                      [movement_counter, obstacle_position_x, obstacle_position_y]))
+                                                      [1, obstacle_position_x, obstacle_position_y]))
                     wifi_command_queue.put(Command(WifiAction.UPDATE_DONE,
-                                                      [movement_counter, obstacle_position_x, obstacle_position_y]))
+                                                      [1, obstacle_position_x, obstacle_position_y]))
+                    sleep(1)
 
                 elif command.command_type == RobotAction.SET_ROBOT_POSITION_DIRECTION:
                     temp_tuple = command.data

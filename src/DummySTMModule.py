@@ -1,6 +1,7 @@
 from multiprocessing import Process, Queue
 from Action import *
 import os
+import time
 from RobotMovementError import *
 
 
@@ -92,6 +93,7 @@ class STMModule:
         except RobotMovementError:
             print("obstacle detected!")
         finally:
+            time.sleep(1)
             return new_x, new_y, new_direction, moved
 
     def check_for_obstacle(self):
