@@ -2,15 +2,15 @@ from multiprocessing import Process, Lock, Queue
 from Action import *
 import socket
 
-# from WifiModule import *
-# from STMModule import STMModule
-# from AndroidLinkModule import *
-# from CameraModule import *
+from WifiModule import *
+from STMModule import STMModule
+from AndroidLinkModule import *
+from CameraModule import *
 
-from DummyAndroidLinkModule import *
-from DummyWifiModule import *
-from DummySTMModule import *
-from DummyCameraModule import DummyCameraModule as CameraModule
+# from DummyAndroidLinkModule import *
+# from DummyWifiModule import *
+# from DummySTMModule import *
+# from DummyCameraModule import DummyCameraModule as CameraModule
 
 
 # TODO anh help pls

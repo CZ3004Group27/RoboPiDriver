@@ -26,7 +26,11 @@ else:
             self.camera = cv2.VideoCapture(self.camera_index)
             # allow the camera to warmup
             time.sleep(0.1)
-            self.initialised = True
+            if self.camera:
+                self.initialised = True
+            else:
+                print("CameraModule Error: Can't connect to camera")
+                self.initialised = False
 
         def take_picture(self):
             self.camera.open(self.camera_index)
