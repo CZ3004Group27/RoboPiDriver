@@ -39,6 +39,7 @@ if __name__ == '__main__':
     override_action = None
     map_array = None
     stm = STMModule()
+    stm.connect()
     override_queue = Queue()
     wifi_stopped_queue = Queue()
     android_stopped_queue = Queue()
@@ -150,4 +151,6 @@ if __name__ == '__main__':
     print("android thread stopped")
     wifi_thread.join()
     print("wifi thread stopped")
+    if stm.isConnected():
+        stm.disconnect()
     print("program shutting down")
