@@ -54,24 +54,13 @@ class Server:
 
     def send_photo(self, conn, image):
         bytes_to_send = self.encode_image_to_send(image)
-        packet = self.include_message_length_as_packet_prefix(bytes_to_send)
-        conn.sendall(packet)
+        send_message_with_size(conn, bytes_to_send)
 
     def encode_image_to_send(self, image):
         buffer = cv2.imencode('.jpg', image)[1].tobytes()
         string_to_send = "PHOTODATA/" + base64.b64encode(buffer).decode(FORMAT)
         bytes_to_send = string_to_send.encode(FORMAT)
         return bytes_to_send
-    
-    def include_message_length_as_packet_prefix(self, bytes_to_send):
-        number_of_bytes = len(bytes_to_send)
-        print(f"Number of bytes in message to be sent: {number_of_bytes}")
-
-        packet_length = struct.pack("!I", number_of_bytes)
-        print("sending photo image")
-
-        packet = packet_length + bytes_to_send
-        return packet
 
 if __name__ == "__main__":
     args = parser.parse_args()
