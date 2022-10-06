@@ -141,9 +141,8 @@ class Main:
             stm.disconnect()
         print("program shutting down")
 
-    # TODO anh help pls
+    # TODO
     def run_pathing(self, stm):
-        camera = CameraModule()
         path_robot_position_x = 0
         path_robot_position_y = 0
         path_robot_direction = 0
@@ -219,7 +218,7 @@ class Main:
         picture = self.get_picture()
 
         # STEP 6: turn left or right around obstacle depending on picture and return back to base
-        
+
 
     def get_picture(self):
         self.wifi_command_queue.put(Command(WifiAction.SEND_PICUTRE, ""))
