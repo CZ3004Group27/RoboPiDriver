@@ -40,7 +40,8 @@ class Server:
                         if command[0] == "PHOTO":
                             self.on_receiving_photo_request(conn)
                         elif command[0] == "MOVEMENTS":
-                            send_message_with_size(conn, "DONE/5/9-8".encode("utf-8"))
+                            num_move = len(command[2].split(","))
+                            send_message_with_size(conn, f"DONE/{num_move}/{command[1]}".encode("utf-8"))
                         print("finish action after receiving message")
     
     def on_receiving_photo_request(self, conn):
