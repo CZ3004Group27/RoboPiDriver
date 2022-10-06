@@ -103,6 +103,8 @@ class WifiModule(Process):
                                 self.send_start_mission_command(conn, command.data)
                             elif command.command_type == WifiAction.UPDATE_DONE:
                                 self.send_done(command.data, conn)
+                            elif command.command_type == WifiAction.SEND_PICTURE:
+                                self.take_photo(command.data,command.command_type,conn)
                         # Get data from wifi connection
                         conn.settimeout(2)
                         data = self.receive_message_with_size(conn)
