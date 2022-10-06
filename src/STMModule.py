@@ -47,6 +47,24 @@ class STMModule:
             print('[STM_INFO] Retrying STM Establishment')
             time.sleep(1)
 
+    def send_movement_to_stm(self, string):
+        received = False
+        timeout = 5
+        while not received:
+            time_start = time.time()
+            self.serialConn.write(str.encode(string))
+            while True:
+                time_passed = time.time() - time_start
+                if time_passed > timeout:
+                    break
+                else:
+                    x = self.read()
+                if x == "ACK":
+                    received = True
+                    print(x)
+                    self.serialConn.write(str.encode('X'))
+                    return
+
 
 
     def forward(self):
@@ -58,13 +76,17 @@ class STMModule:
                 print(len(x))
             if x == "ACK":
                 print(x)
+                self.serialConn.write(str.encode('X'))
                 return
+
+
     def backward(self):
         self.serialConn.write(str.encode("s"))
         while True:
             x = self.read()
             if x == "ACK":
                 print(x)
+                self.serialConn.write(str.encode('X'))
                 return
 
 
@@ -74,6 +96,7 @@ class STMModule:
             x = self.read()
             if x == "ACK":
                 print(x)
+                self.serialConn.write(str.encode('X'))
                 return
 
 
@@ -83,6 +106,7 @@ class STMModule:
             x = self.read()
             if x == "ACK":
                 print(x)
+                self.serialConn.write(str.encode('X'))
                 return
 
 
@@ -92,6 +116,7 @@ class STMModule:
             x = self.read()
             if x == "ACK":
                 print(x)
+                self.serialConn.write(str.encode('X'))
                 return
 
 
@@ -101,6 +126,7 @@ class STMModule:
             x = self.read()
             if x == "ACK":
                 print(x)
+                self.serialConn.write(str.encode('X'))
                 return
 
 
