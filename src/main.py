@@ -181,18 +181,6 @@ class Main:
             path_robot_position_y = y
             path_robot_direction = r
         else:
-            x, y, r, moved = stm.process_move(RobotAction.TURN_FORWARD_LEFT, path_robot_position_x,
-                                              path_robot_position_y,
-                                              path_robot_direction)
-            path_robot_position_x = x
-            path_robot_position_y = y
-            path_robot_direction = r
-            x, y, r, moved = stm.process_move(RobotAction.TURN_FORWARD_RIGHT, path_robot_position_x,
-                                              path_robot_position_y,
-                                              path_robot_direction)
-            path_robot_position_x = x
-            path_robot_position_y = y
-            path_robot_direction = r
             x, y, r, moved = stm.process_move(RobotAction.TURN_FORWARD_RIGHT, path_robot_position_x,
                                               path_robot_position_y,
                                               path_robot_direction)
@@ -200,6 +188,18 @@ class Main:
             path_robot_position_y = y
             path_robot_direction = r
             x, y, r, moved = stm.process_move(RobotAction.TURN_FORWARD_LEFT, path_robot_position_x,
+                                              path_robot_position_y,
+                                              path_robot_direction)
+            path_robot_position_x = x
+            path_robot_position_y = y
+            path_robot_direction = r
+            x, y, r, moved = stm.process_move(RobotAction.TURN_FORWARD_LEFT, path_robot_position_x,
+                                              path_robot_position_y,
+                                              path_robot_direction)
+            path_robot_position_x = x
+            path_robot_position_y = y
+            path_robot_direction = r
+            x, y, r, moved = stm.process_move(RobotAction.TURN_FORWARD_RIGHT, path_robot_position_x,
                                               path_robot_position_y,
                                               path_robot_direction)
             path_robot_position_x = x
@@ -218,7 +218,87 @@ class Main:
         picture = self.get_picture()
 
         # STEP 6: turn left or right around obstacle depending on picture and return back to base
-
+        # STEP 3: Turn left or right around obstacle depending on picture
+        if picture == "left":
+            x, y, r, moved = stm.process_move(RobotAction.TURN_FORWARD_LEFT, path_robot_position_x,
+                                              path_robot_position_y,
+                                              path_robot_direction)
+            path_robot_position_x = x
+            path_robot_position_y = y
+            path_robot_direction = r
+            for x in range(0, 5):
+                x, y, r, moved = stm.process_move(RobotAction.FORWARD, path_robot_position_x,
+                                                  path_robot_position_y,
+                                                  path_robot_direction)
+                path_robot_position_x = x
+                path_robot_position_y = y
+                path_robot_direction = r
+            x, y, r, moved = stm.process_move(RobotAction.TURN_FORWARD_RIGHT, path_robot_position_x,
+                                              path_robot_position_y,
+                                              path_robot_direction)
+            path_robot_position_x = x
+            path_robot_position_y = y
+            path_robot_direction = r
+            x, y, r, moved = stm.process_move(RobotAction.TURN_FORWARD_RIGHT, path_robot_position_x,
+                                              path_robot_position_y,
+                                              path_robot_direction)
+            path_robot_position_x = x
+            path_robot_position_y = y
+            path_robot_direction = r
+            for x in range(0, 10):
+                x, y, r, moved = stm.process_move(RobotAction.FORWARD, path_robot_position_x,
+                                                  path_robot_position_y,
+                                                  path_robot_direction)
+                path_robot_position_x = x
+                path_robot_position_y = y
+                path_robot_direction = r
+            x, y, r, moved = stm.process_move(RobotAction.TURN_FORWARD_LEFT, path_robot_position_x,
+                                              path_robot_position_y,
+                                              path_robot_direction)
+            path_robot_position_x = x
+            path_robot_position_y = y
+            path_robot_direction = r
+            # STEP 7 return to base
+        else:
+            x, y, r, moved = stm.process_move(RobotAction.TURN_FORWARD_RIGHT, path_robot_position_x,
+                                              path_robot_position_y,
+                                              path_robot_direction)
+            path_robot_position_x = x
+            path_robot_position_y = y
+            path_robot_direction = r
+            for x in range(0, 5):
+                x, y, r, moved = stm.process_move(RobotAction.FORWARD, path_robot_position_x,
+                                                  path_robot_position_y,
+                                                  path_robot_direction)
+                path_robot_position_x = x
+                path_robot_position_y = y
+                path_robot_direction = r
+            x, y, r, moved = stm.process_move(RobotAction.TURN_FORWARD_LEFT, path_robot_position_x,
+                                              path_robot_position_y,
+                                              path_robot_direction)
+            path_robot_position_x = x
+            path_robot_position_y = y
+            path_robot_direction = r
+            x, y, r, moved = stm.process_move(RobotAction.TURN_FORWARD_LEFT, path_robot_position_x,
+                                              path_robot_position_y,
+                                              path_robot_direction)
+            path_robot_position_x = x
+            path_robot_position_y = y
+            path_robot_direction = r
+            for x in range(0, 10):
+                x, y, r, moved = stm.process_move(RobotAction.FORWARD, path_robot_position_x,
+                                                  path_robot_position_y,
+                                                  path_robot_direction)
+                path_robot_position_x = x
+                path_robot_position_y = y
+                path_robot_direction = r
+            x, y, r, moved = stm.process_move(RobotAction.TURN_FORWARD_LEFT, path_robot_position_x,
+                                              path_robot_position_y,
+                                              path_robot_direction)
+            path_robot_position_x = x
+            path_robot_position_y = y
+            path_robot_direction = r
+            # STEP 7 return to base
 
     def get_picture(self):
         self.wifi_command_queue.put(Command(WifiAction.SEND_PICUTRE, ""))
