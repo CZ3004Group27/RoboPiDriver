@@ -50,23 +50,58 @@ class STMModule:
 
 
     def forward(self):
-        self.serialConn.write(str.encode("FW"))
+        self.serialConn.write(str.encode("w"))
+        while True:
+            x = self.read()
+            if x is not None:
+                print(x)
+                print(len(x))
+            if x == "ACK":
+                print(x)
+                return
+    def backward(self):
+        self.serialConn.write(str.encode("s"))
+        while True:
+            x = self.read()
+            if x == "ACK":
+                print(x)
+                return
 
 
     def forwardLeft(self):
-        self.serialConn.write(str.encode("FL"))
+        self.serialConn.write(str.encode("a"))
+        while True:
+            x = self.read()
+            if x == "ACK":
+                print(x)
+                return
 
 
     def forwardRight(self):
-        self.serialConn.write(str.encode("FR"))
+        self.serialConn.write(str.encode("d"))
+        while True:
+            x = self.read()
+            if x == "ACK":
+                print(x)
+                return
 
 
-    def backwardleft(self):
-        self.serialConn.write(str.encode("BL"))
+    def backwardLeft(self):
+        self.serialConn.write(str.encode("n"))
+        while True:
+            x = self.read()
+            if x == "ACK":
+                print(x)
+                return
 
 
-    def backwardright(self):
-        self.serialConn.write(str.encode("BR"))
+    def backwardRight(self):
+        self.serialConn.write(str.encode("m"))
+        while True:
+            x = self.read()
+            if x == "ACK":
+                print(x)
+                return
 
 
     # returns new robot position x and y and direction r
@@ -90,14 +125,15 @@ class STMModule:
                 moved = True
                 print("moving backward!")
                 self.backward()
+
                 new_y = new_y - (1 - robot_direction) * (int(not (robot_direction % 2)))
                 new_x = new_x - (2 - robot_direction) * (int((robot_direction % 2)))
             elif move == RobotAction.TURN_FORWARD_LEFT:
                 if self.check_for_obstacle():
                     raise RobotMovementError
                 moved = True
-                print("moving forward left!!")
-                self.forwardleft()
+                print("moving forward left!")
+                self.forwardLeft()
                 if robot_direction == 0 or robot_direction == 1:
                     new_y = new_y + 3
                 else:
@@ -113,7 +149,7 @@ class STMModule:
                     raise RobotMovementError
                 moved = True
                 print("moving forward right!")
-                self.forwardright()
+                self.forwardRight()
                 if robot_direction == 0 or robot_direction == 3:
                     new_y = new_y + 3
                 else:
@@ -129,7 +165,7 @@ class STMModule:
                     raise RobotMovementError
                 moved = True
                 print("moving backward left!")
-                self.backwardleft()
+                self.backwardLeft()
                 if robot_direction == 1 or robot_direction == 2:
                     new_y = new_y + 3
                 else:
@@ -145,7 +181,7 @@ class STMModule:
                     raise RobotMovementError
                 moved = True
                 print("moving backward right!")
-                self.backwardright()
+                self.backwardRight()
                 if robot_direction == 1 or robot_direction == 2:
                     new_y = new_y + 3
                 else:
@@ -177,7 +213,7 @@ class STMModule:
             readData = readData.decode('utf-8')
             if readData == '':
                 return None
-            print('[STM_INFO] Received: ' + readData)
+            #print('[STM_INFO] Received: ' + readData)
             return readData
 
         except Exception as e:
