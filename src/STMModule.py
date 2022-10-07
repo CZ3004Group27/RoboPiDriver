@@ -52,6 +52,24 @@ class STMModule:
     def forward(self):
         self.serialConn.write(str.encode("FW"))
 
+    def forward_with_units(self, number_of_units, robot_position_x, robot_position_y, robot_direction):
+        moved = False
+        new_x = robot_position_x
+        new_y = robot_position_y
+        new_direction = robot_direction
+
+        # STM COMMAND BLOCK #
+
+
+
+
+        # STM COMMAND BLOCK #
+
+        new_y = new_y + (number_of_units * (1 - robot_direction) * (int(not (robot_direction % 2))))
+        new_x = new_x + (number_of_units * (2 - robot_direction) * (int((robot_direction % 2))))
+        moved = True
+        return new_x, new_y, new_direction, moved
+
 
     def forwardLeft(self):
         self.serialConn.write(str.encode("FL"))
