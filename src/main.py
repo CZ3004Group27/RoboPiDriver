@@ -154,7 +154,13 @@ class Main:
         path_robot_position_y = y
         path_robot_direction = r
         # STEP 2: Detect picture
-        picture = self.get_picture()
+        picture = None
+
+        valid_id = False
+        while not valid_id:
+            picture = self.get_picture()
+            if picture != "left" or picture != "right":
+                valid_id = True
         forward = 0
         # STEP 3: Turn left or right around obstacle depending on picture
         if picture == "left":
@@ -172,7 +178,11 @@ class Main:
 
         # STEP 5: Detect picture
 
-        picture = self.get_picture()
+        valid_id = False
+        while not valid_id:
+            picture = self.get_picture()
+            if picture != "left" or picture != "right":
+                valid_id = True
 
         # STEP 6: turn left or right around obstacle depending on picture and return back to base
         # STEP 3: Turn left or right around obstacle depending on picture
