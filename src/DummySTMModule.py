@@ -96,5 +96,14 @@ class STMModule:
             time.sleep(1)
             return new_x, new_y, new_direction, moved
 
+    def connect(self):
+        pass
+
+    def isConnected(self):
+        return True
+
+    def disconnect(self):
+        pass
+
     def check_for_obstacle(self):
         return False

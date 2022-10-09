@@ -4,14 +4,14 @@ import socket
 import time
 
 from WifiModule import *
-from STMModule import STMModule
-from AndroidLinkModule import *
+# from STMModule import STMModule
+# from AndroidLinkModule import *
 from CameraModule import *
 
 
-# from DummyAndroidLinkModule import *
+from DummyAndroidLinkModule import *
 # from DummyWifiModule import *
-# from DummySTMModule import *
+from DummySTMModule import *
 # from DummyCameraModule import DummyCameraModule as CameraModule
 
 
@@ -21,8 +21,8 @@ class Main:
         self.stopped = False
         override_action = None
         map_array = None
-        stm = STMModule()
-        stm.connect()
+        self.stm = STMModule()
+        self.stm.connect()
         self.override_queue = Queue()
         self.wifi_stopped_queue = Queue()
         self.android_stopped_queue = Queue()
@@ -81,8 +81,8 @@ class Main:
                     print(command.data)
                     # if action is a movement action
                     if command.command_type.value <= RobotAction.TURN_BACKWARD_RIGHT.value:
-                        x, y, r, moved = stm.process_move(command.command_type, robot_position_x, robot_position_y,
-                                                          robot_direction)
+                        x, y, r, moved = self.stm.process_move(command.command_type, robot_position_x, robot_position_y,
+                                                               robot_direction)
                         robot_position_x = x
                         robot_position_y = y
                         robot_direction = r
@@ -115,7 +115,7 @@ class Main:
                         self.wifi_command_queue.put(Command(WifiAction.START_MISSION, command.data))
                     elif command.command_type == RobotAction.START_PATH:
                         movement_counter = 0
-                        self.run_pathing(stm)
+                        self.run_pathing()
                     elif command.command_type == RobotAction.SEND_MISSION_PLAN:
                         self.android_command_queue.put(Command(AndroidBluetoothAction.SEND_MISSION_PLAN, command.data))
                     elif command.command_type == RobotAction.WIFI_CONNECTED:
@@ -137,78 +137,35 @@ class Main:
         print("android thread stopped")
         wifi_thread.join()
         print("wifi thread stopped")
-        if stm.isConnected():
-            stm.disconnect()
+        if self.stm.isConnected():
+            self.stm.disconnect()
         print("program shutting down")
 
     # TODO
-    def run_pathing(self, stm):
+    def run_pathing(self):
         path_robot_position_x = 0
         path_robot_position_y = 0
         path_robot_direction = 0
         # STEP 1: move robot forward until detect obstacle and detect time taken
-        x, y, r, moved = stm.process_move(RobotAction.FORWARD_UNTIL_OBS, path_robot_position_x, path_robot_position_y,
-                                          path_robot_direction)
+        x, y, r, moved = self.stm.process_move(RobotAction.FORWARD_UNTIL_OBS, path_robot_position_x,
+                                               path_robot_position_y,
+                                               path_robot_direction)
         path_robot_position_x = x
         path_robot_position_y = y
         path_robot_direction = r
         # STEP 2: Detect picture
         picture = self.get_picture()
+        forward = 0
         # STEP 3: Turn left or right around obstacle depending on picture
         if picture == "left":
-            x, y, r, moved = stm.process_move(RobotAction.TURN_FORWARD_LEFT, path_robot_position_x,
-                                              path_robot_position_y,
-                                              path_robot_direction)
-            path_robot_position_x = x
-            path_robot_position_y = y
-            path_robot_direction = r
-            x, y, r, moved = stm.process_move(RobotAction.TURN_FORWARD_RIGHT, path_robot_position_x,
-                                              path_robot_position_y,
-                                              path_robot_direction)
-            path_robot_position_x = x
-            path_robot_position_y = y
-            path_robot_direction = r
-            x, y, r, moved = stm.process_move(RobotAction.TURN_FORWARD_RIGHT, path_robot_position_x,
-                                              path_robot_position_y,
-                                              path_robot_direction)
-            path_robot_position_x = x
-            path_robot_position_y = y
-            path_robot_direction = r
-            x, y, r, moved = stm.process_move(RobotAction.TURN_FORWARD_LEFT, path_robot_position_x,
-                                              path_robot_position_y,
-                                              path_robot_direction)
-            path_robot_position_x = x
-            path_robot_position_y = y
-            path_robot_direction = r
+            forward = self.quick_swerve_left()
         else:
-            x, y, r, moved = stm.process_move(RobotAction.TURN_FORWARD_RIGHT, path_robot_position_x,
-                                              path_robot_position_y,
-                                              path_robot_direction)
-            path_robot_position_x = x
-            path_robot_position_y = y
-            path_robot_direction = r
-            x, y, r, moved = stm.process_move(RobotAction.TURN_FORWARD_LEFT, path_robot_position_x,
-                                              path_robot_position_y,
-                                              path_robot_direction)
-            path_robot_position_x = x
-            path_robot_position_y = y
-            path_robot_direction = r
-            x, y, r, moved = stm.process_move(RobotAction.TURN_FORWARD_LEFT, path_robot_position_x,
-                                              path_robot_position_y,
-                                              path_robot_direction)
-            path_robot_position_x = x
-            path_robot_position_y = y
-            path_robot_direction = r
-            x, y, r, moved = stm.process_move(RobotAction.TURN_FORWARD_RIGHT, path_robot_position_x,
-                                              path_robot_position_y,
-                                              path_robot_direction)
-            path_robot_position_x = x
-            path_robot_position_y = y
-            path_robot_direction = r
+            forward = self.quick_swerve_right()
         # STEP 4: move robot forward until detect obstacle
 
-        x, y, r, moved = stm.process_move(RobotAction.FORWARD_UNTIL_OBS, path_robot_position_x, path_robot_position_y,
-                                          path_robot_direction)
+        x, y, r, moved = self.stm.process_move(RobotAction.FORWARD_UNTIL_OBS, path_robot_position_x,
+                                               path_robot_position_y,
+                                               path_robot_direction)
         path_robot_position_x = x
         path_robot_position_y = y
         path_robot_direction = r
@@ -220,85 +177,235 @@ class Main:
         # STEP 6: turn left or right around obstacle depending on picture and return back to base
         # STEP 3: Turn left or right around obstacle depending on picture
         if picture == "left":
-            x, y, r, moved = stm.process_move(RobotAction.TURN_FORWARD_LEFT, path_robot_position_x,
-                                              path_robot_position_y,
-                                              path_robot_direction)
-            path_robot_position_x = x
-            path_robot_position_y = y
-            path_robot_direction = r
-            for x in range(0, 5):
-                x, y, r, moved = stm.process_move(RobotAction.FORWARD, path_robot_position_x,
-                                                  path_robot_position_y,
-                                                  path_robot_direction)
-                path_robot_position_x = x
-                path_robot_position_y = y
-                path_robot_direction = r
-            x, y, r, moved = stm.process_move(RobotAction.TURN_FORWARD_RIGHT, path_robot_position_x,
-                                              path_robot_position_y,
-                                              path_robot_direction)
-            path_robot_position_x = x
-            path_robot_position_y = y
-            path_robot_direction = r
-            x, y, r, moved = stm.process_move(RobotAction.TURN_FORWARD_RIGHT, path_robot_position_x,
-                                              path_robot_position_y,
-                                              path_robot_direction)
-            path_robot_position_x = x
-            path_robot_position_y = y
-            path_robot_direction = r
-            for x in range(0, 10):
-                x, y, r, moved = stm.process_move(RobotAction.FORWARD, path_robot_position_x,
-                                                  path_robot_position_y,
-                                                  path_robot_direction)
-                path_robot_position_x = x
-                path_robot_position_y = y
-                path_robot_direction = r
-            x, y, r, moved = stm.process_move(RobotAction.TURN_FORWARD_LEFT, path_robot_position_x,
-                                              path_robot_position_y,
-                                              path_robot_direction)
-            path_robot_position_x = x
-            path_robot_position_y = y
-            path_robot_direction = r
+            forward += self.long_swerve_left()
+            forward += path_robot_position_y
             # STEP 7 return to base
+            x, y, r, moved = self.stm.forward_with_units(forward, path_robot_position_x, path_robot_position_y,
+                                                         path_robot_direction)
+            path_robot_position_x = x
+            path_robot_position_y = y
+            path_robot_direction = r
+            # Turn right
+            x, y, r, moved = self.stm.process_move(RobotAction.TURN_FORWARD_RIGHT, path_robot_position_x,
+                                                   path_robot_position_y,
+                                                   path_robot_direction)
+            path_robot_position_x = x
+            path_robot_position_y = y
+            path_robot_direction = r
+            # forward a bit
+            x, y, r, moved = self.stm.forward_with_units(6, path_robot_position_x,
+                                                         path_robot_position_y,
+                                                         path_robot_direction)
+            path_robot_position_x = x
+            path_robot_position_y = y
+            path_robot_direction = r
+            # turn left
+            x, y, r, moved = self.stm.process_move(RobotAction.TURN_FORWARD_LEFT, path_robot_position_x,
+                                                   path_robot_position_y,
+                                                   path_robot_direction)
+            path_robot_position_x = x
+            path_robot_position_y = y
+            path_robot_direction = r
+            # forward a bit
+            x, y, r, moved = self.stm.forward_with_units(3, path_robot_position_x,
+                                                         path_robot_position_y,
+                                                         path_robot_direction)
+            path_robot_position_x = x
+            path_robot_position_y = y
+            path_robot_direction = r
         else:
-            x, y, r, moved = stm.process_move(RobotAction.TURN_FORWARD_RIGHT, path_robot_position_x,
-                                              path_robot_position_y,
-                                              path_robot_direction)
-            path_robot_position_x = x
-            path_robot_position_y = y
-            path_robot_direction = r
-            for x in range(0, 5):
-                x, y, r, moved = stm.process_move(RobotAction.FORWARD, path_robot_position_x,
-                                                  path_robot_position_y,
-                                                  path_robot_direction)
-                path_robot_position_x = x
-                path_robot_position_y = y
-                path_robot_direction = r
-            x, y, r, moved = stm.process_move(RobotAction.TURN_FORWARD_LEFT, path_robot_position_x,
-                                              path_robot_position_y,
-                                              path_robot_direction)
-            path_robot_position_x = x
-            path_robot_position_y = y
-            path_robot_direction = r
-            x, y, r, moved = stm.process_move(RobotAction.TURN_FORWARD_LEFT, path_robot_position_x,
-                                              path_robot_position_y,
-                                              path_robot_direction)
-            path_robot_position_x = x
-            path_robot_position_y = y
-            path_robot_direction = r
-            for x in range(0, 10):
-                x, y, r, moved = stm.process_move(RobotAction.FORWARD, path_robot_position_x,
-                                                  path_robot_position_y,
-                                                  path_robot_direction)
-                path_robot_position_x = x
-                path_robot_position_y = y
-                path_robot_direction = r
-            x, y, r, moved = stm.process_move(RobotAction.TURN_FORWARD_LEFT, path_robot_position_x,
-                                              path_robot_position_y,
-                                              path_robot_direction)
-            path_robot_position_x = x
-            path_robot_position_y = y
-            path_robot_direction = r
+            forward += self.long_swerve_right()
+            forward += path_robot_position_y
             # STEP 7 return to base
+            x, y, r, moved = self.stm.forward_with_units(forward, path_robot_position_x, path_robot_position_y,
+                                                         path_robot_direction)
+            path_robot_position_x = x
+            path_robot_position_y = y
+            path_robot_direction = r
+
+            # Turn left
+            x, y, r, moved = self.stm.process_move(RobotAction.TURN_FORWARD_LEFT, path_robot_position_x,
+                                                   path_robot_position_y,
+                                                   path_robot_direction)
+            path_robot_position_x = x
+            path_robot_position_y = y
+            path_robot_direction = r
+            # forward a bit
+            x, y, r, moved = self.stm.forward_with_units(6, path_robot_position_x,
+                                                         path_robot_position_y,
+                                                         path_robot_direction)
+            path_robot_position_x = x
+            path_robot_position_y = y
+            path_robot_direction = r
+            # turn right
+            x, y, r, moved = self.stm.process_move(RobotAction.TURN_FORWARD_RIGHT, path_robot_position_x,
+                                                   path_robot_position_y,
+                                                   path_robot_direction)
+            path_robot_position_x = x
+            path_robot_position_y = y
+            path_robot_direction = r
+            # forward a bit
+            x, y, r, moved = self.stm.forward_with_units(3, path_robot_position_x,
+                                                         path_robot_position_y,
+                                                         path_robot_direction)
+            path_robot_position_x = x
+            path_robot_position_y = y
+            path_robot_direction = r
+
+    # returns distance that the robot travelled forward
+    def quick_swerve_left(self):
+        """
+        x, y, r, moved = self.stm.process_move(RobotAction.TURN_FORWARD_LEFT, path_robot_position_x,
+                                               path_robot_position_y,
+                                               path_robot_direction)
+        path_robot_position_x = x
+        path_robot_position_y = y
+        path_robot_direction = r
+        x, y, r, moved = self.stm.process_move(RobotAction.TURN_FORWARD_RIGHT, path_robot_position_x,
+                                               path_robot_position_y,
+                                               path_robot_direction)
+        path_robot_position_x = x
+        path_robot_position_y = y
+        path_robot_direction = r
+        x, y, r, moved = self.stm.process_move(RobotAction.TURN_FORWARD_RIGHT, path_robot_position_x,
+                                               path_robot_position_y,
+                                               path_robot_direction)
+        path_robot_position_x = x
+        path_robot_position_y = y
+        path_robot_direction = r
+        x, y, r, moved = self.stm.process_move(RobotAction.TURN_FORWARD_LEFT, path_robot_position_x,
+                                               path_robot_position_y,
+                                               path_robot_direction)
+        path_robot_position_x = x
+        path_robot_position_y = y
+        path_robot_direction = r
+        """
+        forward = self.stm.quick_swerve_left()
+        return forward
+
+    # returns distance that the robot travelled forward
+    def quick_swerve_right(self):
+        """
+        x, y, r, moved = self.stm.process_move(RobotAction.TURN_FORWARD_RIGHT, path_robot_position_x,
+                                              path_robot_position_y,
+                                              path_robot_direction)
+
+        path_robot_position_x = x
+        path_robot_position_y = y
+        path_robot_direction = r
+        x, y, r, moved = self.stm.process_move(RobotAction.TURN_FORWARD_LEFT, path_robot_position_x,
+                                              path_robot_position_y,
+                                              path_robot_direction)
+        path_robot_position_x = x
+        path_robot_position_y = y
+        path_robot_direction = r
+        x, y, r, moved = self.stm.process_move(RobotAction.TURN_FORWARD_LEFT, path_robot_position_x,
+                                              path_robot_position_y,
+                                              path_robot_direction)
+        path_robot_position_x = x
+        path_robot_position_y = y
+        path_robot_direction = r
+        x, y, r, moved = self.stm.process_move(RobotAction.TURN_FORWARD_RIGHT, path_robot_position_x,
+                                              path_robot_position_y,
+                                              path_robot_direction)
+        path_robot_position_x = x
+        path_robot_position_y = y
+        path_robot_direction = r
+
+        """
+        forward = self.stm.quick_swerve_right()
+        return forward
+
+    # returns distance that the robot travelled forward
+    def long_swerve_left(self):
+        """
+        x, y, r, moved = self.stm.process_move(RobotAction.TURN_FORWARD_LEFT, path_robot_position_x,
+                                               path_robot_position_y,
+                                               path_robot_direction)
+        path_robot_position_x = x
+        path_robot_position_y = y
+        path_robot_direction = r
+        for x in range(0, 5):
+            x, y, r, moved = self.stm.process_move(RobotAction.FORWARD, path_robot_position_x,
+                                                   path_robot_position_y,
+                                                   path_robot_direction)
+            path_robot_position_x = x
+            path_robot_position_y = y
+            path_robot_direction = r
+        x, y, r, moved = self.stm.process_move(RobotAction.TURN_FORWARD_RIGHT, path_robot_position_x,
+                                               path_robot_position_y,
+                                               path_robot_direction)
+        path_robot_position_x = x
+        path_robot_position_y = y
+        path_robot_direction = r
+        x, y, r, moved = self.stm.process_move(RobotAction.TURN_FORWARD_RIGHT, path_robot_position_x,
+                                               path_robot_position_y,
+                                               path_robot_direction)
+        path_robot_position_x = x
+        path_robot_position_y = y
+        path_robot_direction = r
+        for x in range(0, 10):
+            x, y, r, moved = self.stm.process_move(RobotAction.FORWARD, path_robot_position_x,
+                                                   path_robot_position_y,
+                                                   path_robot_direction)
+            path_robot_position_x = x
+            path_robot_position_y = y
+            path_robot_direction = r
+        x, y, r, moved = self.stm.process_move(RobotAction.TURN_FORWARD_LEFT, path_robot_position_x,
+                                               path_robot_position_y,
+                                               path_robot_direction)
+        path_robot_position_x = x
+        path_robot_position_y = y
+        path_robot_direction = r
+        """
+        forward = self.stm.long_swerve_left()
+        return forward
+
+    # returns distance that the robot travelled forward
+    def long_swerve_right(self):
+        """
+        x, y, r, moved = self.stm.process_move(RobotAction.TURN_FORWARD_RIGHT, path_robot_position_x,
+                                              path_robot_position_y,
+                                              path_robot_direction)
+        path_robot_position_x = x
+        path_robot_position_y = y
+        path_robot_direction = r
+        for x in range(0, 5):
+            x, y, r, moved = self.stm.process_move(RobotAction.FORWARD, path_robot_position_x,
+                                                  path_robot_position_y,
+                                                  path_robot_direction)
+            path_robot_position_x = x
+            path_robot_position_y = y
+            path_robot_direction = r
+        x, y, r, moved = self.stm.process_move(RobotAction.TURN_FORWARD_LEFT, path_robot_position_x,
+                                              path_robot_position_y,
+                                              path_robot_direction)
+        path_robot_position_x = x
+        path_robot_position_y = y
+        path_robot_direction = r
+        x, y, r, moved = self.stm.process_move(RobotAction.TURN_FORWARD_LEFT, path_robot_position_x,
+                                              path_robot_position_y,
+                                              path_robot_direction)
+        path_robot_position_x = x
+        path_robot_position_y = y
+        path_robot_direction = r
+        for x in range(0, 10):
+                x, y, r, moved = self.stm.process_move(RobotAction.FORWARD, path_robot_position_x,
+                                                  path_robot_position_y,
+                                                  path_robot_direction)
+            path_robot_position_x = x
+            path_robot_position_y = y
+            path_robot_direction = r
+        x, y, r, moved = self.stm.process_move(RobotAction.TURN_FORWARD_LEFT, path_robot_position_x,
+                                              path_robot_position_y,
+                                              path_robot_direction)
+        path_robot_position_x = x
+        path_robot_position_y = y
+        path_robot_direction = r
+        """
+
+        forward = self.stm.long_swerve_right()
+        return forward
 
     def get_picture(self):
         self.wifi_command_queue.put(Command(WifiAction.SEND_PICUTRE, ""))

@@ -218,13 +218,9 @@ class AndroidLinkModule(Process):
 
     def start_path(self, command, data):
         print("starting mission")
-        self.start_mission(command, data)
         print("starting path")
         self.robot_action_queue.put(Command(RobotAction.START_PATH, data))
 
-    def start_mission(self, command, data):
-        print("starting mission")
-        self.robot_action_queue.put(Command(RobotAction.START_MISSION, data))
 
     def update_robot_position(self, command, data):
         robot_position_info = map(str, command[1].replace('(', '').replace(')', '').split(','))
