@@ -160,8 +160,35 @@ class Main:
         # STEP 3: Turn left or right around obstacle depending on picture
         if picture == "Left":
             forward = self.quick_swerve_left()
-        else:
+        elif picture == "Right":
             forward = self.quick_swerve_right()
+        else:
+            x, y, r, moved = self.stm.process_move(RobotAction.BACKWARD, path_robot_position_x,
+                                                   path_robot_position_y,
+                                                   path_robot_direction)
+            path_robot_position_x = x
+            path_robot_position_y = y
+            path_robot_direction = r
+            picture = self.get_picture()
+            if picture == "Left":
+                x, y, r, moved = self.stm.process_move(RobotAction.FORWARD, path_robot_position_x,
+                                                       path_robot_position_y,
+                                                       path_robot_direction)
+                path_robot_position_x = x
+                path_robot_position_y = y
+                path_robot_direction = r
+                forward = self.quick_swerve_left()
+            elif picture == "Right":
+                x, y, r, moved = self.stm.process_move(RobotAction.FORWARD, path_robot_position_x,
+                                                       path_robot_position_y,
+                                                       path_robot_direction)
+                path_robot_position_x = x
+                path_robot_position_y = y
+                path_robot_direction = r
+                forward = self.quick_swerve_right()
+            else:
+                print("Error! could not get picture!")
+                return
         # STEP 4: move robot forward until detect obstacle
 
         x, y, r, moved = self.stm.process_move(RobotAction.FORWARD_UNTIL_OBS, path_robot_position_x,
@@ -213,7 +240,7 @@ class Main:
             path_robot_position_x = x
             path_robot_position_y = y
             path_robot_direction = r
-        else:
+        elif picture == "Right":
             forward += self.long_swerve_right()
             forward += path_robot_position_y
             # STEP 7 return to base
@@ -251,7 +278,104 @@ class Main:
             path_robot_position_x = x
             path_robot_position_y = y
             path_robot_direction = r
+        else:
+            x, y, r, moved = self.stm.process_move(RobotAction.BACKWARD, path_robot_position_x,
+                                                   path_robot_position_y,
+                                                   path_robot_direction)
+            path_robot_position_x = x
+            path_robot_position_y = y
+            path_robot_direction = r
+            picture = self.get_picture()
+            if picture == "Left":
+                x, y, r, moved = self.stm.process_move(RobotAction.FORWARD, path_robot_position_x,
+                                                       path_robot_position_y,
+                                                       path_robot_direction)
+                path_robot_position_x = x
+                path_robot_position_y = y
+                path_robot_direction = r
+                forward += self.long_swerve_left()
+                forward += path_robot_position_y
+                # STEP 7 return to base
+                x, y, r, moved = self.stm.forward_with_units(forward, path_robot_position_x, path_robot_position_y,
+                                                             path_robot_direction)
+                path_robot_position_x = x
+                path_robot_position_y = y
+                path_robot_direction = r
+                # Turn right
+                x, y, r, moved = self.stm.process_move(RobotAction.TURN_FORWARD_RIGHT, path_robot_position_x,
+                                                       path_robot_position_y,
+                                                       path_robot_direction)
+                path_robot_position_x = x
+                path_robot_position_y = y
+                path_robot_direction = r
+                # forward a bit
+                x, y, r, moved = self.stm.forward_with_units(6, path_robot_position_x,
+                                                             path_robot_position_y,
+                                                             path_robot_direction)
+                path_robot_position_x = x
+                path_robot_position_y = y
+                path_robot_direction = r
+                # turn left
+                x, y, r, moved = self.stm.process_move(RobotAction.TURN_FORWARD_LEFT, path_robot_position_x,
+                                                       path_robot_position_y,
+                                                       path_robot_direction)
+                path_robot_position_x = x
+                path_robot_position_y = y
+                path_robot_direction = r
+                # forward a bit
+                x, y, r, moved = self.stm.forward_with_units(3, path_robot_position_x,
+                                                             path_robot_position_y,
+                                                             path_robot_direction)
+                path_robot_position_x = x
+                path_robot_position_y = y
+                path_robot_direction = r
+            elif picture == "Right":
+                x, y, r, moved = self.stm.process_move(RobotAction.FORWARD, path_robot_position_x,
+                                                       path_robot_position_y,
+                                                       path_robot_direction)
+                path_robot_position_x = x
+                path_robot_position_y = y
+                path_robot_direction = r
+                forward += self.long_swerve_right()
+                forward += path_robot_position_y
+                # STEP 7 return to base
+                x, y, r, moved = self.stm.forward_with_units(forward, path_robot_position_x, path_robot_position_y,
+                                                             path_robot_direction)
+                path_robot_position_x = x
+                path_robot_position_y = y
+                path_robot_direction = r
 
+                # Turn left
+                x, y, r, moved = self.stm.process_move(RobotAction.TURN_FORWARD_LEFT, path_robot_position_x,
+                                                       path_robot_position_y,
+                                                       path_robot_direction)
+                path_robot_position_x = x
+                path_robot_position_y = y
+                path_robot_direction = r
+                # forward a bit
+                x, y, r, moved = self.stm.forward_with_units(6, path_robot_position_x,
+                                                             path_robot_position_y,
+                                                             path_robot_direction)
+                path_robot_position_x = x
+                path_robot_position_y = y
+                path_robot_direction = r
+                # turn right
+                x, y, r, moved = self.stm.process_move(RobotAction.TURN_FORWARD_RIGHT, path_robot_position_x,
+                                                       path_robot_position_y,
+                                                       path_robot_direction)
+                path_robot_position_x = x
+                path_robot_position_y = y
+                path_robot_direction = r
+                # forward a bit
+                x, y, r, moved = self.stm.forward_with_units(3, path_robot_position_x,
+                                                             path_robot_position_y,
+                                                             path_robot_direction)
+                path_robot_position_x = x
+                path_robot_position_y = y
+                path_robot_direction = r
+            else:
+                print("Error! could not get picture!")
+                return
     # returns distance that the robot travelled forward
     def quick_swerve_left(self):
         """
