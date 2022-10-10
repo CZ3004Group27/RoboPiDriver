@@ -202,7 +202,6 @@ class Main:
         picture = self.get_picture()
 
         # STEP 6: turn left or right around obstacle depending on picture and return back to base
-        # STEP 3: Turn left or right around obstacle depending on picture
         if picture == "Left":
             forward += self.long_swerve_left()
             forward += path_robot_position_y
@@ -376,6 +375,8 @@ class Main:
             else:
                 print("Error! could not get picture!")
                 return
+        # Send back finish
+        self.android_command_queue.put(Command(AndroidBluetoothAction.SEND_FINISH, "FINISH/PATH/"))
     # returns distance that the robot travelled forward
     def quick_swerve_left(self):
         """
