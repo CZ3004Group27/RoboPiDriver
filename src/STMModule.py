@@ -64,6 +64,15 @@ class STMModule:
                     print(x)
                     self.serialConn.write(str.encode('X'))
                     return
+    def forward_until_obs(self):
+        # STM COMMAND BLOCK #
+
+        # measure with STM and set variable to tell rpi how much the robot moves forward during this move
+        forward = 0
+
+        # STM COMMAND BLOCK #
+
+        return forward
 
     def quick_swerve_left(self):
         # STM COMMAND BLOCK #

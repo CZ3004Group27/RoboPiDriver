@@ -147,22 +147,17 @@ class Main:
         path_robot_position_x = 0
         path_robot_position_y = 0
         path_robot_direction = 0
+        forward = 0
         # STEP 1: move robot forward until detect obstacle and detect time taken
-        x, y, r, moved = self.stm.process_move(RobotAction.FORWARD_UNTIL_OBS, path_robot_position_x,
-                                               path_robot_position_y,
-                                               path_robot_direction)
-        path_robot_position_x = x
-        path_robot_position_y = y
-        path_robot_direction = r
+        forward = self.stm.forward_until_obs()
         # STEP 2: Detect picture
         picture = self.get_picture()
 
-        forward = 0
         # STEP 3: Turn left or right around obstacle depending on picture
         if picture == "Left":
-            forward = self.quick_swerve_left()
+            forward += self.quick_swerve_left()
         elif picture == "Right":
-            forward = self.quick_swerve_right()
+            forward += self.quick_swerve_right()
         else:
             x, y, r, moved = self.stm.process_move(RobotAction.BACKWARD, path_robot_position_x,
                                                    path_robot_position_y,
@@ -192,9 +187,7 @@ class Main:
                 return
         # STEP 4: move robot forward until detect obstacle
 
-        x, y, r, moved = self.stm.process_move(RobotAction.FORWARD_UNTIL_OBS, path_robot_position_x,
-                                               path_robot_position_y,
-                                               path_robot_direction)
+        foward += self.stm.forward_until_obs()
         path_robot_position_x = x
         path_robot_position_y = y
         path_robot_direction = r
