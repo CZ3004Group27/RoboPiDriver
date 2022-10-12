@@ -149,15 +149,15 @@ class Main:
         path_robot_direction = 0
         forward = 0
         # STEP 1: move robot forward until detect obstacle and detect time taken
-        forward = self.stm.forward_until_obs()
+        self.stm.forward_until_obs()
         # STEP 2: Detect picture
         picture = self.get_picture()
 
         # STEP 3: Turn left or right around obstacle depending on picture
         if picture == "Left":
-            forward += self.quick_swerve_left()
+            self.quick_swerve_left()
         elif picture == "Right":
-            forward += self.quick_swerve_right()
+            self.quick_swerve_right()
         else:
             x, y, r, moved = self.stm.process_move(RobotAction.BACKWARD, path_robot_position_x,
                                                    path_robot_position_y,
@@ -173,7 +173,7 @@ class Main:
                 path_robot_position_x = x
                 path_robot_position_y = y
                 path_robot_direction = r
-                forward = self.quick_swerve_left()
+                self.quick_swerve_left()
             elif picture == "Right":
                 x, y, r, moved = self.stm.process_move(RobotAction.FORWARD, path_robot_position_x,
                                                        path_robot_position_y,
@@ -181,13 +181,13 @@ class Main:
                 path_robot_position_x = x
                 path_robot_position_y = y
                 path_robot_direction = r
-                forward = self.quick_swerve_right()
+                self.quick_swerve_right()
             else:
                 print("Error! could not get picture!")
                 return
         # STEP 4: move robot forward until detect obstacle
 
-        foward += self.stm.forward_until_obs()
+        self.stm.forward_until_obs()
         path_robot_position_x = x
         path_robot_position_y = y
         path_robot_direction = r
@@ -197,16 +197,10 @@ class Main:
 
         # STEP 6: turn left or right around obstacle depending on picture and return back to base
         if picture == "Left":
-            forward += self.long_swerve_left()
-            forward += path_robot_position_y * UNITS_MULTIPLIER
-            # STEP 7 return to base
-            self.stm.return_to_base_left(forward)
+            self.long_swerve_left_and_return()
             path_robot_direction = r
         elif picture == "Right":
-            forward += self.long_swerve_right()
-            forward += path_robot_position_y * UNITS_MULTIPLIER
-            # STEP 7 return to base
-            self.stm.return_to_base_right(forward)
+            self.long_swerve_right_and_return()
 
         else:
             x, y, r, moved = self.stm.process_move(RobotAction.BACKWARD, path_robot_position_x,
@@ -223,10 +217,7 @@ class Main:
                 path_robot_position_x = x
                 path_robot_position_y = y
                 path_robot_direction = r
-                forward += self.long_swerve_left()
-                forward += path_robot_position_y * UNITS_MULTIPLIER
-                # STEP 7 return to base
-                x, y, r, moved = self.stm.return_to_base_left(forward)
+                self.long_swerve_left_and_return()
             elif picture == "Right":
                 x, y, r, moved = self.stm.process_move(RobotAction.FORWARD, path_robot_position_x,
                                                        path_robot_position_y,
@@ -234,10 +225,8 @@ class Main:
                 path_robot_position_x = x
                 path_robot_position_y = y
                 path_robot_direction = r
-                forward += self.long_swerve_right()
-                forward += path_robot_position_y * UNITS_MULTIPLIER
-                # STEP 7 return to base
-                x, y, r, moved = self.stm.return_to_base_right(forward)
+
+                self.long_swerve_right_and_return()
 
             else:
                 print("Error! could not get picture!")
@@ -273,7 +262,6 @@ class Main:
         path_robot_direction = r
         """
         forward = self.stm.quick_swerve_left()
-        return forward
 
     # returns distance that the robot travelled forward
     def quick_swerve_right(self):
@@ -306,10 +294,9 @@ class Main:
 
         """
         forward = self.stm.quick_swerve_right()
-        return forward
 
     # returns distance that the robot travelled forward
-    def long_swerve_left(self):
+    def long_swerve_left_and_return(self):
         """
         x, y, r, moved = self.stm.process_move(RobotAction.TURN_FORWARD_LEFT, path_robot_position_x,
                                                path_robot_position_y,
@@ -350,11 +337,10 @@ class Main:
         path_robot_position_y = y
         path_robot_direction = r
         """
-        forward = self.stm.long_swerve_left()
-        return forward
+        forward = self.stm.long_swerve_left_and_return()
 
     # returns distance that the robot travelled forward
-    def long_swerve_right(self):
+    def long_swerve_right_and_return(self):
         """
         x, y, r, moved = self.stm.process_move(RobotAction.TURN_FORWARD_RIGHT, path_robot_position_x,
                                               path_robot_position_y,
@@ -396,8 +382,7 @@ class Main:
         path_robot_direction = r
         """
 
-        forward = self.stm.long_swerve_right()
-        return forward
+        forward = self.stm.long_swerve_right_and_return()
 
     def get_picture(self):
         self.wifi_command_queue.put(Command(WifiAction.SEND_PICUTRE, ""))
