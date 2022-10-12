@@ -65,7 +65,62 @@ class STMModule:
                     self.serialConn.write(str.encode('X'))
                     return
 
+    def quick_swerve_left(self):
+        # STM COMMAND BLOCK #
 
+        # measure and set variable to tell rpi how much the robot moves forward during this move
+        forward = 0
+
+        # STM COMMAND BLOCK #
+
+        return forward
+
+    def quick_swerve_right(self):
+        # STM COMMAND BLOCK #
+
+        # measure and set variable to tell rpi how much the robot moves forward during this move
+        forward = 0
+
+        # STM COMMAND BLOCK #
+
+        return forward
+
+    def long_swerve_left(self):
+        # STM COMMAND BLOCK #
+
+        # measure and set variable to tell rpi how much the robot moves forward during this move
+        forward = 0
+
+        # STM COMMAND BLOCK #
+
+        return forward
+
+    def long_swerve_right(self):
+        # STM COMMAND BLOCK #
+
+        # measure and set variable to tell rpi how much the robot moves forward during this move
+        forward = 0
+
+        # STM COMMAND BLOCK #
+
+        return forward
+
+    def return_to_base_left(self, number_of_units_foward):
+
+        # STM COMMAND BLOCK #
+
+
+
+
+        # STM COMMAND BLOCK #
+
+    def return_to_base_right(self,number_of_units_foward):
+        # STM COMMAND BLOCK #
+
+
+
+
+        # STM COMMAND BLOCK #
 
     def forward(self):
         self.serialConn.write(str.encode("w"))
@@ -88,24 +143,6 @@ class STMModule:
                 print(x)
                 self.serialConn.write(str.encode('X'))
                 return
-
-    def forward_with_units(self, number_of_units, robot_position_x, robot_position_y, robot_direction):
-        moved = False
-        new_x = robot_position_x
-        new_y = robot_position_y
-        new_direction = robot_direction
-
-        # STM COMMAND BLOCK #
-
-
-
-
-        # STM COMMAND BLOCK #
-
-        new_y = new_y + (number_of_units * (1 - robot_direction) * (int(not (robot_direction % 2))))
-        new_x = new_x + (number_of_units * (2 - robot_direction) * (int((robot_direction % 2))))
-        moved = True
-        return new_x, new_y, new_direction, moved
 
 
     def forwardLeft(self):
