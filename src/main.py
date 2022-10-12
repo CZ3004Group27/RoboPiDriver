@@ -261,7 +261,7 @@ class Main:
         path_robot_position_y = y
         path_robot_direction = r
         """
-        forward = self.stm.quick_swerve_left()
+        self.stm.quick_swerve_left()
 
     # returns distance that the robot travelled forward
     def quick_swerve_right(self):
@@ -293,7 +293,7 @@ class Main:
         path_robot_direction = r
 
         """
-        forward = self.stm.quick_swerve_right()
+        self.stm.quick_swerve_right()
 
     # returns distance that the robot travelled forward
     def long_swerve_left_and_return(self):
@@ -337,7 +337,7 @@ class Main:
         path_robot_position_y = y
         path_robot_direction = r
         """
-        forward = self.stm.long_swerve_left_and_return()
+        self.stm.long_swerve_left_and_return()
 
     # returns distance that the robot travelled forward
     def long_swerve_right_and_return(self):
@@ -382,7 +382,7 @@ class Main:
         path_robot_direction = r
         """
 
-        forward = self.stm.long_swerve_right_and_return()
+        self.stm.long_swerve_right_and_return()
 
     def get_picture(self):
         self.wifi_command_queue.put(Command(WifiAction.SEND_PICUTRE, ""))
