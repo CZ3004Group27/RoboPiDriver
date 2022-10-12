@@ -143,6 +143,7 @@ class Main:
 
     # TODO
     def run_pathing(self):
+        UNITS_MULTIPLIER = 1
         path_robot_position_x = 0
         path_robot_position_y = 0
         path_robot_direction = 0
@@ -204,13 +205,13 @@ class Main:
         # STEP 6: turn left or right around obstacle depending on picture and return back to base
         if picture == "Left":
             forward += self.long_swerve_left()
-            forward += path_robot_position_y
+            forward += path_robot_position_y * UNITS_MULTIPLIER
             # STEP 7 return to base
             self.stm.return_to_base_left(forward)
             path_robot_direction = r
         elif picture == "Right":
             forward += self.long_swerve_right()
-            forward += path_robot_position_y
+            forward += path_robot_position_y * UNITS_MULTIPLIER
             # STEP 7 return to base
             self.stm.return_to_base_right(forward)
 
@@ -230,7 +231,7 @@ class Main:
                 path_robot_position_y = y
                 path_robot_direction = r
                 forward += self.long_swerve_left()
-                forward += path_robot_position_y
+                forward += path_robot_position_y * UNITS_MULTIPLIER
                 # STEP 7 return to base
                 x, y, r, moved = self.stm.return_to_base_left(forward)
             elif picture == "Right":
@@ -241,7 +242,7 @@ class Main:
                 path_robot_position_y = y
                 path_robot_direction = r
                 forward += self.long_swerve_right()
-                forward += path_robot_position_y
+                forward += path_robot_position_y * UNITS_MULTIPLIER
                 # STEP 7 return to base
                 x, y, r, moved = self.stm.return_to_base_right(forward)
 
