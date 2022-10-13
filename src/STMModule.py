@@ -150,6 +150,24 @@ class STMModule:
 
         # STM COMMAND BLOCK #
 
+    def backupLeft(self):
+        self.serialConn.write(str.encode("l"))
+        while True:
+            x = self.read()
+            if x == "ACK":
+                print(x)
+                self.serialConn.write(str.encode('X'))
+                return
+
+    def backupRight(self):
+        self.serialConn.write(str.encode("r"))
+        while True:
+            x = self.read()
+            if x == "ACK":
+                print(x)
+                self.serialConn.write(str.encode('X'))
+                return            
+
 
     def forward(self):
         self.serialConn.write(str.encode("w"))
