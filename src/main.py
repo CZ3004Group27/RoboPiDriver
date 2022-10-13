@@ -192,6 +192,7 @@ class Main:
                 self.quick_swerve_right()
             else:
                 print("Error! could not get picture!")
+                self.android_command_queue.put(Command(AndroidBluetoothAction.SEND_FINISH, b"FINISH/PATH/"))
                 return
         # STEP 4: move robot forward until detect obstacle
         print("4")
@@ -236,10 +237,11 @@ class Main:
 
             else:
                 print("Error! could not get picture!")
+                self.android_command_queue.put(Command(AndroidBluetoothAction.SEND_FINISH, b"FINISH/PATH/"))
                 return
         print("7")
         # Send back finish
-        self.android_command_queue.put(Command(AndroidBluetoothAction.SEND_FINISH, "FINISH/PATH/"))
+        self.android_command_queue.put(Command(AndroidBluetoothAction.SEND_FINISH, b"FINISH/PATH/"))
     # returns distance that the robot travelled forward
     def quick_swerve_left(self):
         """

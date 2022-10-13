@@ -83,6 +83,8 @@ else:
 
     def send_message_with_size(conn, data):
         number_of_bytes = len(data)
+        print("sending to android:")
+        print(data)
         packet_length = struct.pack("!I", number_of_bytes)
         packet_length += data
         conn.sendall(packet_length)
