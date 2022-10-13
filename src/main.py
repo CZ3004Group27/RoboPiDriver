@@ -197,7 +197,10 @@ class Main:
         # STEP 4: move robot forward until detect obstacle
         print("4")
         self.stm.forward_until_obs()
-
+        if picture == "Left":
+            self.stm.backupLeft()
+        elif picture == "Right":
+            self.stm.backupRight()
         # STEP 5: Detect picture
         print("5")
         picture = self.get_picture()
