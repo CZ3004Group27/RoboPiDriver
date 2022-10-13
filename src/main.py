@@ -147,6 +147,10 @@ class Main:
         path_robot_position_x = 0
         path_robot_position_y = 0
         path_robot_direction = 0
+        x = 0
+        y = 0
+        r = 0
+        moved = False
         forward = 0
         # STEP 1: move robot forward until detect obstacle and detect time taken
         self.stm.forward_until_obs()
@@ -188,9 +192,6 @@ class Main:
         # STEP 4: move robot forward until detect obstacle
 
         self.stm.forward_until_obs()
-        path_robot_position_x = x
-        path_robot_position_y = y
-        path_robot_direction = r
 
         # STEP 5: Detect picture
         picture = self.get_picture()
@@ -385,7 +386,7 @@ class Main:
         self.stm.long_swerve_right_and_return()
 
     def get_picture(self):
-        self.wifi_command_queue.put(Command(WifiAction.SEND_PICUTRE, ""))
+        self.wifi_command_queue.put(Command(WifiAction.SEND_PICTURE, ""))
         while True:
             if not self.override_queue.empty():
                 override_action = self.override_queue.get()
