@@ -116,6 +116,7 @@ class Main:
                     elif command.command_type == RobotAction.START_PATH:
                         movement_counter = 0
                         self.run_pathing()
+                        print("finish path")
                     elif command.command_type == RobotAction.SEND_MISSION_PLAN:
                         self.android_command_queue.put(Command(AndroidBluetoothAction.SEND_MISSION_PLAN, command.data))
                     elif command.command_type == RobotAction.WIFI_CONNECTED:
@@ -153,11 +154,14 @@ class Main:
         moved = False
         forward = 0
         # STEP 1: move robot forward until detect obstacle and detect time taken
+        print("1")
         self.stm.forward_until_obs()
         # STEP 2: Detect picture
+        print("2")
         picture = self.get_picture()
 
         # STEP 3: Turn left or right around obstacle depending on picture
+        print("3")
         if picture == "Left":
             self.quick_swerve_left()
         elif picture == "Right":
@@ -190,16 +194,17 @@ class Main:
                 print("Error! could not get picture!")
                 return
         # STEP 4: move robot forward until detect obstacle
-
+        print("4")
         self.stm.forward_until_obs()
 
         # STEP 5: Detect picture
+        print("5")
         picture = self.get_picture()
+        print("6")
 
         # STEP 6: turn left or right around obstacle depending on picture and return back to base
         if picture == "Left":
             self.long_swerve_left_and_return()
-            path_robot_direction = r
         elif picture == "Right":
             self.long_swerve_right_and_return()
 
@@ -232,6 +237,7 @@ class Main:
             else:
                 print("Error! could not get picture!")
                 return
+        print("7")
         # Send back finish
         self.android_command_queue.put(Command(AndroidBluetoothAction.SEND_FINISH, "FINISH/PATH/"))
     # returns distance that the robot travelled forward
