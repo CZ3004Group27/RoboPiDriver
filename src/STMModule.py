@@ -67,6 +67,16 @@ class STMModule:
 
     def forward_until_obs(self):
         # STM COMMAND BLOCK #
+        self.serialConn.write(str.encode("o"))
+        while True:
+            x = self.read()
+            if x is not None:
+                print(x)
+                print(len(x))
+            if x == "ACK":
+                print(x)
+                self.serialConn.write(str.encode('X'))
+                return
 
 
 
@@ -75,7 +85,16 @@ class STMModule:
 
     def quick_swerve_left(self):
         # STM COMMAND BLOCK #
-
+        self.serialConn.write(str.encode("z"))
+        while True:
+            x = self.read()
+            if x is not None:
+                print(x)
+                print(len(x))
+            if x == "ACK":
+                print(x)
+                self.serialConn.write(str.encode('X'))
+                return
 
 
         # STM COMMAND BLOCK #
@@ -84,16 +103,32 @@ class STMModule:
 
     def quick_swerve_right(self):
         # STM COMMAND BLOCK #
-
+        self.serialConn.write(str.encode("x"))
+        while True:
+            x = self.read()
+            if x is not None:
+                print(x)
+                print(len(x))
+            if x == "ACK":
+                print(x)
+                self.serialConn.write(str.encode('X'))
+                return
 
 
         # STM COMMAND BLOCK #
-
-        return forward
 
     def long_swerve_left_and_return(self):
         # STM COMMAND BLOCK #
-
+        self.serialConn.write(str.encode("c"))
+        while True:
+            x = self.read()
+            if x is not None:
+                print(x)
+                print(len(x))
+            if x == "ACK":
+                print(x)
+                self.serialConn.write(str.encode('X'))
+                return
 
         # STM COMMAND BLOCK #
 
@@ -101,7 +136,16 @@ class STMModule:
 
     def long_swerve_right_and_return(self):
         # STM COMMAND BLOCK #
-
+        self.serialConn.write(str.encode("v"))
+        while True:
+            x = self.read()
+            if x is not None:
+                print(x)
+                print(len(x))
+            if x == "ACK":
+                print(x)
+                self.serialConn.write(str.encode('X'))
+                return
 
 
         # STM COMMAND BLOCK #
