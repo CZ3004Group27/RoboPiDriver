@@ -45,7 +45,7 @@ class AndroidBluetoothAction(IntEnum):
 class WifiAction(IntEnum):
     START_MISSION = 1
     UPDATE_DONE = 2
-    SEND_PICUTRE = 3
+    SEND_PICTURE = 3
 
 
 class Command:
