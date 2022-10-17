@@ -213,19 +213,24 @@ class Main:
             self.long_swerve_right_and_return()
 
         else:
-            numback = 0
-            while picture not in ["Left", "Right"]:
-
+            num_back = 0
+            max_numback = 3
+            while picture not in ["Left", "Right"] and num_back <= max_numback:
                 x, y, r, moved = self.stm.process_move(RobotAction.BACKWARD, path_robot_position_x,
                                                        path_robot_position_y,
                                                        path_robot_direction)
                 picture = self.get_picture()
-                numback += 1
 
-            for i in range(numback):
-                x, y, r, moved = self.stm.process_move(RobotAction.FORWARD, path_robot_position_x,
-                                                       path_robot_position_y,
-                                                       path_robot_direction)
+                num_back += 1
+
+            x, y, r, moved = self.stm.process_move(RobotAction.BACKWARD, path_robot_position_x,
+                                                   path_robot_position_y,
+                                                   path_robot_direction)
+
+            self.stm.forward_until_obs()
+
+            if picture not in ["Left", "Right"]:
+                picture = self.get_picture()
 
             if picture == "Left":
                 self.long_swerve_left_and_return()
