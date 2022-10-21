@@ -213,35 +213,34 @@ class Main:
             self.long_swerve_right_and_return()
 
         else:
+            num_back = 0
+            max_numback = 3
+            while picture not in ["Left", "Right"] and num_back <= max_numback:
+                x, y, r, moved = self.stm.process_move(RobotAction.BACKWARD, path_robot_position_x,
+                                                       path_robot_position_y,
+                                                       path_robot_direction)
+                picture = self.get_picture()
+
+                num_back += 1
+
             x, y, r, moved = self.stm.process_move(RobotAction.BACKWARD, path_robot_position_x,
                                                    path_robot_position_y,
                                                    path_robot_direction)
-            path_robot_position_x = x
-            path_robot_position_y = y
-            path_robot_direction = r
-            picture = self.get_picture()
+
+            self.stm.forward_until_obs()
+
+            if picture not in ["Left", "Right"]:
+                picture = self.get_picture()
+
             if picture == "Left":
-                x, y, r, moved = self.stm.process_move(RobotAction.FORWARD, path_robot_position_x,
-                                                       path_robot_position_y,
-                                                       path_robot_direction)
-                path_robot_position_x = x
-                path_robot_position_y = y
-                path_robot_direction = r
                 self.long_swerve_left_and_return()
             elif picture == "Right":
-                x, y, r, moved = self.stm.process_move(RobotAction.FORWARD, path_robot_position_x,
-                                                       path_robot_position_y,
-                                                       path_robot_direction)
-                path_robot_position_x = x
-                path_robot_position_y = y
-                path_robot_direction = r
-
                 self.long_swerve_right_and_return()
 
-            else:
-                print("Error! could not get picture!")
-                self.android_command_queue.put(Command(AndroidBluetoothAction.SEND_FINISH, b"FINISH/PATH/"))
-                return
+            # else:
+            #     print("Error! could not get picture!")
+            #     self.android_command_queue.put(Command(AndroidBluetoothAction.SEND_FINISH, b"FINISH/PATH/"))
+            #     return
         print("7")
         # Send back finish
         self.android_command_queue.put(Command(AndroidBluetoothAction.SEND_FINISH, b"FINISH/PATH/"))
