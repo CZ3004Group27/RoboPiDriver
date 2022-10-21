@@ -47,6 +47,24 @@ class STMModule:
             print('[STM_INFO] Retrying STM Establishment')
             time.sleep(1)
 
+    def send_function_and_args_to_stm(self, string: str):
+        received = False
+        timeout = 5
+        while not received:
+            time_start = time.time()
+            self.serialConn.write(str.encode(string))
+            while True:
+                time_passed = time.time() - time_start
+                if time_passed > timeout:
+                    break
+                else:
+                    x = self.read()
+                if x == "ACK":
+                    received = True
+                    print(x)
+                    self.serialConn.write(str.encode('X'))
+                    return
+
     def send_movement_to_stm(self, string):
         received = False
         timeout = 5
